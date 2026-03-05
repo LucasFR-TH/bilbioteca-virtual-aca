@@ -1,0 +1,26 @@
+<!-- views/folders/index.ejs -->
+<div class="page-header">
+  <h1 class="page-title">Carpetas</h1>
+</div>
+<div class="folder-tree-page">
+  <% folderTree.forEach(root => { %>
+    <div class="folder-root-card" style="--folder-color:<%= root.color %>">
+      <div class="folder-root-header">
+        <span class="folder-big-icon"><%= root.icon %></span>
+        <div>
+          <a href="/folders/<%= root.id %>" class="folder-root-title"><%= root.name %></a>
+          <p class="folder-root-desc"><%= root.description %></p>
+        </div>
+      </div>
+      <% if (root.children && root.children.length > 0) { %>
+        <div class="folder-children-list">
+          <% root.children.forEach(child => { %>
+            <a href="/folders/<%= child.id %>" class="folder-child-item">
+              <span><%= child.icon %></span> <%= child.name %>
+            </a>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  <% }) %>
+</div>

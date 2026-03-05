@@ -1,0 +1,28 @@
+<!-- views/documents/_card.ejs — Partial: tarjeta de documento -->
+<div class="doc-card" style="--doc-color:<%= doc.category ? doc.category.color : '#7a7068' %>">
+  <div class="doc-card-bar"></div>
+  <div class="doc-card-header">
+    <span class="doc-type-badge" style="background:<%= doc.fileTypeMeta.color %>22;color:<%= doc.fileTypeMeta.color %>;border-color:<%= doc.fileTypeMeta.color %>44">
+      <%= doc.fileType %>
+    </span>
+    <span class="doc-type-icon"><%= doc.fileTypeMeta.icon %></span>
+  </div>
+  <div class="doc-card-body">
+    <h3 class="doc-card-title">
+      <a href="/documents/<%= doc.id %>"><%= doc.title %></a>
+    </h3>
+    <p class="doc-card-desc"><%= doc.excerpt %></p>
+  </div>
+  <div class="doc-card-meta">
+    <% if (doc.category) { %>
+      <span class="doc-cat-tag" style="background:<%= doc.category.color %>1a;color:<%= doc.category.color %>">
+        <%= doc.category.icon %> <%= doc.category.name %>
+      </span>
+    <% } %>
+    <span class="doc-date"><%= doc.formattedDate %></span>
+  </div>
+  <div class="doc-card-actions">
+    <a href="/documents/<%= doc.id %>" class="btn-preview">👁 Ver</a>
+    <a href="/documents/<%= doc.id %>/download" class="btn-download">⬇ Descargar</a>
+  </div>
+</div>

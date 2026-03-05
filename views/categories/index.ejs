@@ -1,0 +1,13 @@
+<!-- views/categories/index.ejs -->
+<div class="page-header"><h1 class="page-title">Categorías</h1></div>
+<div class="category-page-grid">
+  <% categories.forEach(cat => { %>
+    <a href="/categories/<%= cat.id %>" class="cat-page-card" style="--cat-color:<%= cat.color %>">
+      <div class="cat-page-icon"><%= cat.icon %></div>
+      <h2 class="cat-page-name"><%= cat.name %></h2>
+      <p class="cat-page-desc"><%= cat.description %></p>
+      <span class="cat-page-count"><%= cat.documentCount %> documentos</span>
+      <div class="cat-page-bar"></div>
+    </a>
+  <% }) %>
+</div>

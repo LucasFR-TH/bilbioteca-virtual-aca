@@ -1,0 +1,40 @@
+<!-- views/documents/index.ejs -->
+<div class="page-header">
+  <h1 class="page-title">Documentos</h1>
+  <a href="/documents/new" class="btn-primary">+ Nuevo</a>
+</div>
+
+<!-- Filtros -->
+<form method="GET" action="/documents" class="filter-bar">
+  <input type="text" name="q" value="<%= filters.q || '' %>" placeholder="Buscar..." class="filter-input" />
+  <select name="category" class="filter-select">
+    <option value="">Todas las categorías</option>
+    <% categories.forEach(cat => { %>
+      <option value="<%= cat.id %>" <%= filters.category === cat.id ? 'selected' : '' %>><%= cat.icon %> <%= cat.name %></option>
+    <% }) %>
+  </select>
+  <select name="type" class="filter-select">
+    <option value="">Todos los tipos</option>
+    <% fileTypes.forEach(t => { %>
+      <option value="<%= t %>" <%= filters.type === t ? 'selected' : '' %>><%= t %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="btn-filter">Filtrar</button>
+  <a href="/documents" class="btn-clear">✕ Limpiar</a>
+  <span class="filter-count"><%= documents.length %> resultado<%= documents.length !== 1 ? 's' : '' %></span>
+</form>
+
+<!-- Grilla -->
+<% if (documents.length === 0) { %>
+  <div class="empty-state">
+    <div class="empty-icon">📭</div>
+    <p>No se encontraron documentos.</p>
+    <a href="/documents/new" class="btn-primary">Agregar el primero</a>
+  </div>
+<% } else { %>
+  <div class="doc-grid">
+    <% documents.forEach(doc => { %>
+      <%- include('_card', { doc }) %>
+    <% }) %>
+  </div>
+<% } %>

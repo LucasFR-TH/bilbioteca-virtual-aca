@@ -1,0 +1,65 @@
+<!-- views/index.ejs — Dashboard principal -->
+
+<!-- Hero stats -->
+<div class="page-hero">
+  <h1 class="page-title">Biblioteca Digital</h1>
+  <p class="page-subtitle">Centro de gestión y acceso a documentos institucionales</p>
+  <div class="hero-stats">
+    <div class="hstat"><span class="hstat-num"><%= stats.active %></span><span class="hstat-label">Documentos</span></div>
+    <div class="hstat"><span class="hstat-num"><%= categories.length %></span><span class="hstat-label">Categorías</span></div>
+    <div class="hstat"><span class="hstat-num"><%= stats.totalDownloads %></span><span class="hstat-label">Descargas</span></div>
+  </div>
+</div>
+
+<!-- Buscador principal -->
+<div class="home-search-wrap">
+  <form action="/search" method="GET" class="home-search-form">
+    <input type="text" name="q" placeholder="Buscar por título, categoría, etiqueta..." class="home-search-input" autofocus />
+    <button type="submit" class="home-search-btn">Buscar</button>
+  </form>
+</div>
+
+<!-- Categorías -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Categorías</h2>
+    <a href="/categories" class="section-link">Ver todas →</a>
+  </div>
+  <div class="category-grid">
+    <% categories.forEach(cat => { %>
+      <a href="/documents?category=<%= cat.id %>" class="category-card" style="--cat-color:<%= cat.color %>">
+        <span class="cat-icon"><%= cat.icon %></span>
+        <span class="cat-name"><%= cat.name %></span>
+        <span class="cat-count"><%= cat.documents.length %> docs</span>
+        <div class="cat-bar"></div>
+      </a>
+    <% }) %>
+  </div>
+</section>
+
+<!-- Documentos destacados -->
+<% if (featured.length > 0) { %>
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">⭐ Destacados</h2>
+    <a href="/documents" class="section-link">Ver todos →</a>
+  </div>
+  <div class="doc-grid">
+    <% featured.forEach(doc => { %>
+      <%- include('documents/_card', { doc }) %>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<!-- Recientes -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">🕐 Agregados recientemente</h2>
+  </div>
+  <div class="doc-grid">
+    <% recent.forEach(doc => { %>
+      <%- include('documents/_card', { doc }) %>
+    <% }) %>
+  </div>
+</section>

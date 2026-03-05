@@ -1,0 +1,12 @@
+<!-- views/categories/show.ejs -->
+<div class="page-header" style="border-left:4px solid <%= category.color %>; padding-left:1.5rem">
+  <h1 class="page-title"><%= category.icon %> <%= category.name %></h1>
+  <p class="page-subtitle"><%= category.description %></p>
+</div>
+<% if (documents.length === 0) { %>
+  <div class="empty-state"><div class="empty-icon">📭</div><p>No hay documentos en esta categoría.</p></div>
+<% } else { %>
+  <div class="doc-grid">
+    <% documents.forEach(doc => { %><%- include('../documents/_card', { doc }) %><% }) %>
+  </div>
+<% } %>

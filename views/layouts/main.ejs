@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> — Biblioteca Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+
+  <!-- ── SIDEBAR ─────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">📚</div>
+      <div>
+        <div class="logo-title">Biblioteca</div>
+        <div class="logo-sub">Digital Archive</div>
+      </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <% if (typeof stats !== 'undefined' && stats) { %>
+    <div class="sidebar-stats">
+      <div class="stat-chip"><span class="stat-num"><%= stats.active %></span><span class="stat-label">Docs</span></div>
+      <div class="stat-chip"><span class="stat-num"><%= stats.totalDownloads %></span><span class="stat-label">Descargas</span></div>
+    </div>
+    <% } %>
+
+    <!-- Nav principal -->
+    <nav class="sidebar-nav">
+      <a href="/" class="nav-item <%= currentPath === '/' ? 'active' : '' %>">
+        <span>🏠</span> Inicio
+      </a>
+      <a href="/documents" class="nav-item <%= currentPath.startsWith('/documents') ? 'active' : '' %>">
+        <span>📄</span> Documentos
+      </a>
+      <a href="/folders" class="nav-item <%= currentPath.startsWith('/folders') ? 'active' : '' %>">
+        <span>📁</span> Carpetas
+      </a>
+      <a href="/categories" class="nav-item <%= currentPath.startsWith('/categories') ? 'active' : '' %>">
+        <span>🏷️</span> Categorías
+      </a>
+      <a href="/search" class="nav-item <%= currentPath.startsWith('/search') ? 'active' : '' %>">
+        <span>🔍</span> Búsqueda avanzada
+      </a>
+    </nav>
+
+    <!-- Árbol de carpetas -->
+    <% if (typeof folderTree !== 'undefined' && folderTree) { %>
+    <div class="folder-tree">
+      <div class="tree-label">CARPETAS</div>
+      <% folderTree.forEach(folder => { %>
+        <div class="tree-root">
+          <a href="/folders/<%= folder.id %>" class="tree-node root-node">
+            <span class="toggle-arrow">▶</span>
+            <span><%= folder.icon %></span>
+            <span class="node-name"><%= folder.name %></span>
+            <span class="node-dot" style="background:<%= folder.color %>"></span>
+          </a>
+          <% if (folder.children && folder.children.length) { %>
+            <div class="tree-children">
+              <% folder.children.forEach(child => { %>
+                <a href="/folders/<%= child.id %>" class="tree-node child-node">
+                  <span><%= child.icon %></span>
+                  <span class="node-name"><%= child.name %></span>
+                </a>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <div class="sidebar-footer">
+      <a href="/documents/new" class="btn-new-doc">+ Nuevo Documento</a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────────── -->
+  <div class="layout">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <form action="/search" method="GET" class="search-form">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" placeholder="Buscar documentos..." class="search-input" />
+        <button type="submit" class="search-btn">Buscar</button>
+      </form>
+      <a href="/api/documents" class="topbar-api-link" target="_blank">⚡ API</a>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+      <%- body %>
+    </main>
+  </div>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

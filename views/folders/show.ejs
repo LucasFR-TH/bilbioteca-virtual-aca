@@ -1,0 +1,26 @@
+<!-- views/folders/show.ejs -->
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="/folders">Carpetas</a>
+      <% if (folder.parent) { %> › <a href="/folders/<%= folder.parent.id %>"><%= folder.parent.name %></a><% } %>
+      › <%= folder.name %>
+    </div>
+    <h1 class="page-title"><%= folder.icon %> <%= folder.name %></h1>
+    <p class="page-subtitle"><%= folder.description %></p>
+  </div>
+</div>
+<% if (folder.children && folder.children.length > 0) { %>
+  <div class="subfolder-row">
+    <% folder.children.forEach(child => { %>
+      <a href="/folders/<%= child.id %>" class="subfolder-chip"><%= child.icon %> <%= child.name %></a>
+    <% }) %>
+  </div>
+<% } %>
+<% if (documents.length === 0) { %>
+  <div class="empty-state"><div class="empty-icon">📭</div><p>Esta carpeta no tiene documentos.</p></div>
+<% } else { %>
+  <div class="doc-grid">
+    <% documents.forEach(doc => { %><%- include('../documents/_card', { doc }) %><% }) %>
+  </div>
+<% } %>
