@@ -1,7 +1,10 @@
-<!-- views/errors/404.ejs -->
+<%# views/errors/404.ejs %>
 <div class="error-page">
   <div class="error-code">404</div>
   <h1 class="error-title">Página no encontrada</h1>
-  <p>El recurso que buscás no existe o fue eliminado.</p>
-  <a href="/" class="btn-primary">← Volver al inicio</a>
+  <p class="error-desc">El documento o la sección que buscás no existe o fue eliminada.</p>
+  <div style="display:flex; gap:12px; margin-top:8px;">
+    <a href="/" class="btn-primary">🏠 Ir al inicio</a>
+    <a href="/documents" class="btn-secondary">📄 Ver documentos</a>
+  </div>
 </div>

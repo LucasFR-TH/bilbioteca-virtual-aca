@@ -1,0 +1,130 @@
+@model bilbioteca_virtual_aca.Models.ViewModels.DocumentViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    var typeColor = Model.FileTypeColor ?? "#f0c87a";
+}
+
+<div class="doc-show-layout">
+
+    <!-- ── Panel izquierdo: Preview Drive ────────────────── -->
+    <div class="doc-preview-panel">
+        <div class="preview-header">
+            <span class="preview-label">📄 Vista previa · Google Drive</span>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="drive-badge"
+                        onclick="navigator.clipboard.writeText('@Model.DriveUrl').then(()=>showToast('🔗 Link copiado','info',2000))"
+                        style="border:none; cursor:pointer; background:rgba(26,115,232,0.1);">
+                    🔗 Copiar link
+                </button>
+                <a href="@Model.DriveUrl" target="_blank" rel="noopener" class="preview-open-link">
+                    Abrir en Drive ↗
+                </a>
+            </div>
+        </div>
+
+        <div class="preview-frame-wrap">
+            <div class="preview-loading">
+                <div class="preview-spinner"></div>
+                <span>Cargando desde Google Drive…</span>
+            </div>
+            <iframe
+                src="@Model.PreviewUrl"
+                class="preview-iframe"
+                allow="autoplay"
+                title="Vista previa: @Model.Title"
+                loading="lazy">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- ── Panel derecho: Metadatos ──────────────────────── -->
+    <aside class="doc-meta-panel">
+
+        <div class="meta-type-badge"
+             style="background:@(typeColor)1a; border-color:@(typeColor)44; color:@typeColor">
+            @Model.FileTypeIcon @Model.FileType
+        </div>
+
+        <h1 class="meta-title">@Model.Title</h1>
+        <p class="meta-desc">@Model.Description</p>
+
+        <div class="meta-actions">
+            <a href="@Url.Action("Download","Documents", new { id = Model.Id })" class="btn-dl-primary">
+                ⬇ Descargar desde Drive
+            </a>
+            <a href="@Model.DriveUrl" target="_blank" rel="noopener" class="btn-dl-secondary">
+                🔗 Ver en Google Drive
+            </a>
+        </div>
+
+        <div class="meta-section">
+            <div class="meta-section-title">Detalles</div>
+            <div class="meta-table">
+
+                @if (!string.IsNullOrEmpty(Model.CategoryName))
+                {
+                    <div class="meta-row">
+                        <span class="meta-key">Categoría</span>
+                        <a href="@Url.Action("Show","Categories", new { id = Model.CategoryId })"
+                           class="meta-val" style="color:@Model.CategoryColor">
+                            @Model.CategoryIcon @Model.CategoryName
+                        </a>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.FolderName))
+                {
+                    <div class="meta-row">
+                        <span class="meta-key">Carpeta</span>
+                        <a href="@Url.Action("Show","Folders", new { id = Model.FolderId })" class="meta-val">
+                            @Model.FolderIcon @Model.FolderName
+                        </a>
+                    </div>
+                }
+
+                <div class="meta-row">
+                    <span class="meta-key">Tipo</span>
+                    <span class="meta-val">@Model.FileType</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-key">Descargas</span>
+                    <span class="meta-val">@Model.DownloadCount</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-key">Agregado</span>
+                    <span class="meta-val">@Model.FormattedDate</span>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Tags != null && Model.Tags.Any())
+        {
+            <div class="meta-section">
+                <div class="meta-section-title">Etiquetas</div>
+                <div class="meta-tags">
+                    @foreach (var tag in Model.Tags)
+                    {
+                        <a href="@Url.Action("Index","Search", new { q = tag })" class="meta-tag">#@tag</a>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="meta-section" style="margin-top:auto;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a href="@Url.Action("Edit","Documents", new { id = Model.Id })"
+                   class="btn-secondary" style="font-size:11px; padding:7px 12px;">✏️ Editar</a>
+
+                <form asp-controller="Documents" asp-action="Archive" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-danger"
+                            style="font-size:11px; padding:7px 12px;"
+                            onclick="return confirm('¿Archivar este documento?')">
+                        🗄 Archivar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </aside>
+</div>

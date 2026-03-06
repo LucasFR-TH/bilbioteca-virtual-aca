@@ -98,3 +98,5 @@ C:\Users\lucas\OneDrive\Escritorio\biblioteca-digital\biblioteca-digital\bilbiot
 C:\Users\lucas\OneDrive\Escritorio\biblioteca-digital\biblioteca-digital\bilbioteca-virtual-aca\obj\Debug\net10.0\bilbioteca-virtual-aca.pdb
 C:\Users\lucas\OneDrive\Escritorio\biblioteca-digital\biblioteca-digital\bilbioteca-virtual-aca\obj\Debug\net10.0\bilbioteca-virtual-aca.genruntimeconfig.cache
 C:\Users\lucas\OneDrive\Escritorio\biblioteca-digital\biblioteca-digital\bilbioteca-virtual-aca\obj\Debug\net10.0\ref\bilbioteca-virtual-aca.dll
+C:\Users\lucas\OneDrive\Escritorio\biblioteca-digital\biblioteca-digital\bilbioteca-virtual-aca\obj\Debug\net10.0\compressed\9muxkjesgv-{0}-qpc2zv2868-qpc2zv2868.gz
+C:\Users\lucas\OneDrive\Escritorio\biblioteca-digital\biblioteca-digital\bilbioteca-virtual-aca\obj\Debug\net10.0\compressed\t038iz105h-{0}-bpm5fqyvjl-bpm5fqyvjl.gz

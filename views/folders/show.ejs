@@ -1,26 +1,66 @@
-<!-- views/folders/show.ejs -->
-<div class="page-header">
+<%# views/folders/show.ejs — Contenido de carpeta %>
+
+<!-- Breadcrumb + header -->
+<div class="breadcrumb" style="margin-bottom:8px;">
+  <a href="/">Inicio</a> <span>›</span>
+  <a href="/folders">Carpetas</a>
+  <% if (folder.parent) { %>
+    <span>›</span> <a href="/folders/<%= folder.parent.id %>"><%= folder.parent.name %></a>
+  <% } %>
+  <span>›</span> <%= folder.name %>
+</div>
+
+<!-- Header de carpeta -->
+<div class="folder-show-header">
+  <span class="folder-show-icon"><%= folder.icon %></span>
   <div>
-    <div class="breadcrumb">
-      <a href="/folders">Carpetas</a>
-      <% if (folder.parent) { %> › <a href="/folders/<%= folder.parent.id %>"><%= folder.parent.name %></a><% } %>
-      › <%= folder.name %>
-    </div>
-    <h1 class="page-title"><%= folder.icon %> <%= folder.name %></h1>
-    <p class="page-subtitle"><%= folder.description %></p>
+    <h1 class="folder-show-title"><%= folder.name %></h1>
+    <% if (folder.description) { %>
+      <p class="folder-show-meta"><%= folder.description %></p>
+    <% } %>
+    <p class="folder-show-meta" style="margin-top:4px;">
+      <%= documents.length %> documento<%= documents.length !== 1 ? 's' : '' %>
+      <% if (folder.children && folder.children.length > 0) { %>
+        · <%= folder.children.length %> subcarpeta<%= folder.children.length !== 1 ? 's' : '' %>
+      <% } %>
+    </p>
   </div>
 </div>
+
+<!-- Subcarpetas (si tiene) -->
 <% if (folder.children && folder.children.length > 0) { %>
-  <div class="subfolder-row">
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">📁 Subcarpetas</h2>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
     <% folder.children.forEach(child => { %>
-      <a href="/folders/<%= child.id %>" class="subfolder-chip"><%= child.icon %> <%= child.name %></a>
+      <a href="/folders/<%= child.id %>" class="folder-child-item">
+        <span><%= child.icon %></span> <%= child.name %>
+      </a>
     <% }) %>
   </div>
+</section>
 <% } %>
-<% if (documents.length === 0) { %>
-  <div class="empty-state"><div class="empty-icon">📭</div><p>Esta carpeta no tiene documentos.</p></div>
-<% } else { %>
-  <div class="doc-grid">
-    <% documents.forEach(doc => { %><%- include('../documents/_card', { doc }) %><% }) %>
+
+<!-- Documentos de esta carpeta -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">📄 Documentos</h2>
+    <a href="/documents/new" class="section-link">＋ Agregar →</a>
   </div>
-<% } %>
+
+  <% if (documents.length === 0) { %>
+    <div class="empty-state" style="padding:40px 0;">
+      <div class="empty-icon">📂</div>
+      <p>Esta carpeta está vacía.</p>
+      <a href="/documents/new" class="btn-primary">Agregar documento</a>
+    </div>
+  <% } else { %>
+    <div class="doc-grid">
+      <% documents.forEach(doc => { %>
+        <%- include('../documents/_card', { doc }) %>
+      <% }) %>
+    </div>
+  <% } %>
+</section>

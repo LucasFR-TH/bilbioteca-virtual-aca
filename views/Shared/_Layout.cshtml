@@ -1,50 +1,128 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - bilbioteca_virtual_aca</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/bilbioteca_virtual_aca.styles.css" asp-append-version="true" />
+    <title>@ViewData["Title"] — Biblioteca Digital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/biblioteca.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">bilbioteca_virtual_aca</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+
+<div class="app-shell">
+
+    <!-- ══ SIDEBAR ══════════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-icon">📚</div>
+            <div>
+                <div class="logo-title">Biblioteca</div>
+                <div class="logo-sub">Digital Archive</div>
+            </div>
+        </div>
+
+        @if (ViewBag.Stats != null)
+        {
+            <div class="sidebar-stats">
+                <div class="stat-chip">
+                    <span class="stat-num">@ViewBag.Stats.Active</span>
+                    <span class="stat-label">Docs</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-num">@ViewBag.Stats.TotalDownloads</span>
+                    <span class="stat-label">Descargas</span>
                 </div>
             </div>
+        }
+
+        <nav class="sidebar-nav">
+            <a href="@Url.Action("Index","Home")"
+               class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                <span>🏠</span> Inicio
+            </a>
+            <a href="@Url.Action("Index","Documents")"
+               class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Documents" ? "active" : "")">
+                <span>📄</span> Documentos
+            </a>
+            <a href="@Url.Action("Index","Folders")"
+               class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Folders" ? "active" : "")">
+                <span>📁</span> Carpetas
+            </a>
+            <a href="@Url.Action("Index","Categories")"
+               class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Categories" ? "active" : "")">
+                <span>🏷️</span> Categorías
+            </a>
+            <a href="@Url.Action("Index","Search")"
+               class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Search" ? "active" : "")">
+                <span>🔍</span> Búsqueda
+            </a>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+        @if (ViewBag.FolderTree != null)
+        {
+            <div class="folder-tree">
+                <div class="tree-label">Carpetas</div>
+                @foreach (var folder in ViewBag.FolderTree)
+                {
+                    <div class="tree-root">
+                        <a href="@Url.Action("Show","Folders", new { id = folder.Id })" class="tree-node root-node">
+                            <span class="toggle-arrow">▶</span>
+                            <span>@folder.Icon</span>
+                            <span class="node-name">@folder.Name</span>
+                            <span class="node-dot" style="background:@folder.Color"></span>
+                        </a>
+                        @if (folder.Children != null && folder.Children.Count > 0)
+                        {
+                            <div class="tree-children">
+                                @foreach (var child in folder.Children)
+                                {
+                                    <a href="@Url.Action("Show","Folders", new { id = child.Id })" class="tree-node child-node">
+                                        <span>@child.Icon</span>
+                                        <span class="node-name">@child.Name</span>
+                                    </a>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="sidebar-footer">
+            <a href="@Url.Action("Create","Documents")" class="btn-new-doc">＋ Nuevo Documento</a>
+        </div>
+
+    </aside>
+
+    <!-- ══ LAYOUT PRINCIPAL ══════════════════════════════════ -->
+    <div class="layout">
+
+        <header class="topbar">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menú">☰</button>
+
+            <form asp-controller="Search" asp-action="Index" method="get" class="search-form" role="search">
+                <span class="search-icon">🔍</span>
+                <input type="text" name="q" placeholder="Buscar documentos… (presioná /)"
+                       class="search-input" autocomplete="off"
+                       value="@ViewBag.SearchQuery" />
+                <button type="submit" class="search-btn">Buscar</button>
+            </form>
+
+            <a href="/api/documents" class="topbar-api-link" target="_blank" rel="noopener">⚡ API</a>
+        </header>
+
+        <main class="main-content" id="main" role="main">
             @RenderBody()
         </main>
+
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - bilbioteca_virtual_aca - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+</div>
+
+<script src="~/js/biblioteca.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

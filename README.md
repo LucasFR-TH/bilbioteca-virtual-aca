@@ -1,137 +1,139 @@
-# 📚 Biblioteca Digital — Arquitectura MVC
+# 📚 Biblioteca Digital — MVC + Google Drive
 
-Sistema de gestión de biblioteca digital con arquitectura MVC, POO y API REST.
+Sistema de gestión de documentos institucionales con arquitectura **MVC**, **POO**, **API REST** y previsualización desde **Google Drive**.
 
-## 📦 Instalación
+---
+
+## ⚡ Instalación rápida
 
 ```bash
 npm install
-npm start          # producción
-npm run dev        # desarrollo con nodemon (auto-reload)
+npm run dev       # desarrollo (nodemon)
+npm start         # producción
 ```
 
 Abre **http://localhost:3000**
 
 ---
 
-## 🏗️ Arquitectura del Proyecto
+## 🗂️ Estructura de carpetas
 
 ```
 biblioteca-digital/
 │
-├── app.js                         # Entrada principal: Express, middlewares, rutas
+├── app.js                              # Entrada principal · Express + middlewares + rutas
+├── package.json
+├── .env                                # PORT=3000 / NODE_ENV=development
 │
-├── src/
+├── src/                                # ← Backend (ya existente y funcional)
 │   ├── config/
-│   │   └── database.js            # Rutas y configuración de la DB por entorno
+│   │   └── database.js                 # Configuración de la DB por entorno
 │   │
 │   ├── database/
-│   │   └── db.json                # Base de datos JSON (editable directamente)
+│   │   └── db.json                     # Base de datos JSON (editable directamente)
 │   │
-│   ├── models/                    ← POO: Entidades del dominio
-│   │   ├── BaseModel.js           # Clase base abstracta (id, timestamps, validate, toJSON)
-│   │   ├── Document.js            # Modelo Documento (fileTypeMeta, previewUrl, downloadUrl...)
-│   │   ├── Folder.js              # Modelo Carpeta (árbol jerárquico, breadcrumb)
-│   │   └── Category.js            # Modelo Categoría (color, icon, documentCount)
+│   ├── models/                         ← POO: Entidades del dominio
+│   │   ├── BaseModel.js                # Clase base (id, timestamps, validate, toJSON)
+│   │   ├── Document.js                 # driveId, previewUrl, downloadUrl, fileTypeMeta
+│   │   ├── Folder.js                   # Árbol jerárquico, breadcrumb
+│   │   └── Category.js                 # color, icon, documentCount
 │   │
-│   ├── repositories/              ← Capa de acceso a datos (patrón Repository)
-│   │   ├── BaseRepository.js      # CRUD genérico: findAll, findById, create, update, delete
-│   │   ├── DocumentRepository.js  # search(), findByCategory(), findFeatured(), getStats()
-│   │   ├── FolderRepository.js    # buildTree(), findChildren(), findRoots()
-│   │   └── CategoryRepository.js  # createCategory()
+│   ├── repositories/                   ← Patrón Repository (acceso a datos)
+│   │   ├── BaseRepository.js           # CRUD genérico
+│   │   ├── DocumentRepository.js       # search, findFeatured, getStats
+│   │   ├── FolderRepository.js         # buildTree, findChildren, findRoots
+│   │   └── CategoryRepository.js
 │   │
-│   ├── controllers/               ← Lógica de negocio y orquestación
-│   │   ├── DocumentController.js  # index, show, new, create, edit, update, archive, download
-│   │   ├── FolderController.js    # index, show, create, update, delete
-│   │   └── SearchController.js    # SearchController + CategoryController
+│   ├── controllers/                    ← Lógica de negocio
+│   │   ├── DocumentController.js       # index, show, new, create, edit, update, archive, download
+│   │   ├── FolderController.js         # index, show
+│   │   └── SearchController.js         # search + CategoryController
 │   │
-│   ├── routes/                    ← Definición de rutas HTTP
-│   │   ├── index.js               # GET /  (dashboard)
-│   │   ├── documentRoutes.js      # CRUD /documents
-│   │   ├── folderRoutes.js        # CRUD /folders
-│   │   ├── categoryRoutes.js      # CRUD /categories
-│   │   ├── searchRoutes.js        # GET /search
-│   │   └── apiRoutes.js           # REST API /api/...
+│   ├── routes/                         ← Rutas HTTP
+│   │   ├── index.js                    # GET /
+│   │   ├── documentRoutes.js           # CRUD /documents
+│   │   ├── folderRoutes.js             # /folders
+│   │   ├── categoryRoutes.js           # /categories
+│   │   ├── searchRoutes.js             # /search
+│   │   └── apiRoutes.js                # REST API /api/...
 │   │
-│   ├── middleware/
-│   │   ├── errorHandler.js        # Manejo global de errores (500)
-│   │   └── notFound.js            # 404
-│   │
-│   └── services/                  # (para lógica extra futura)
+│   └── middleware/
+│       ├── errorHandler.js             # 500
+│       └── notFound.js                 # 404
 │
-├── views/                         ← Templates EJS (View en MVC)
+├── views/                              ← Templates EJS (capa View del MVC)
+│   │
 │   ├── layouts/
-│   │   └── main.ejs               # Layout principal: sidebar, topbar, nav
-│   ├── index.ejs                  # Dashboard: hero, categorías, destacados, recientes
+│   │   └── main.ejs                    # ★ Layout principal: sidebar, topbar, nav, árbol
+│   │
+│   ├── index.ejs                       # ★ Dashboard: hero, búsqueda, categorías, destacados, recientes
+│   │
 │   ├── documents/
-│   │   ├── _card.ejs              # Partial: tarjeta de documento (reutilizable)
-│   │   ├── index.ejs              # Listado con filtros
-│   │   ├── show.ejs               # Vista detalle + iframe preview
-│   │   └── form.ejs               # Formulario crear/editar
+│   │   ├── _card.ejs                   # ★ Partial: tarjeta de documento (reutilizable)
+│   │   ├── index.ejs                   # ★ Listado con filtros (q, category, type)
+│   │   ├── show.ejs                    # ★ Detalle + iframe preview Drive + descarga
+│   │   └── form.ejs                    # ★ Formulario crear/editar (driveId autocomplete)
+│   │
 │   ├── folders/
-│   │   ├── index.ejs              # Árbol de carpetas
-│   │   └── show.ejs               # Contenido de carpeta
+│   │   ├── index.ejs                   # ★ Árbol de carpetas (grilla de cards)
+│   │   └── show.ejs                    # ★ Contenido de carpeta + subcarpetas
+│   │
 │   ├── categories/
-│   │   ├── index.ejs              # Grilla de categorías
-│   │   └── show.ejs               # Documentos por categoría
+│   │   ├── index.ejs                   # ★ Grilla de categorías
+│   │   └── show.ejs                    # ★ Documentos por categoría
+│   │
 │   ├── search/
-│   │   └── results.ejs            # Resultados de búsqueda
+│   │   └── results.ejs                 # ★ Resultados + filtros avanzados
+│   │
 │   └── errors/
-│       ├── 404.ejs
-│       └── 500.ejs
+│       ├── 404.ejs                     # ★ Página no encontrada
+│       └── 500.ejs                     # ★ Error del servidor (con stack en dev)
 │
 └── public/
-    ├── css/main.css               # Estilos (dark theme, tipografía, responsive)
-    └── js/main.js                 # Interacciones: sidebar, animaciones, confirmar
-
+    ├── css/
+    │   └── main.css                    # ★ Dark theme completo · responsive · animaciones
+    └── js/
+        └── main.js                     # ★ Sidebar, árbol, confirm, Drive autocomplete, toasts
 ```
 
----
-
-## 🔗 Rutas disponibles
-
-| Método | Ruta                          | Descripción                        |
-|--------|-------------------------------|------------------------------------|
-| GET    | `/`                           | Dashboard principal                |
-| GET    | `/documents`                  | Listado con filtros                |
-| GET    | `/documents/new`              | Formulario nuevo documento         |
-| POST   | `/documents`                  | Crear documento                    |
-| GET    | `/documents/:id`              | Vista detalle + preview            |
-| GET    | `/documents/:id/edit`         | Formulario edición                 |
-| PUT    | `/documents/:id`              | Actualizar documento               |
-| DELETE | `/documents/:id`              | Archivar documento                 |
-| GET    | `/documents/:id/download`     | Registrar descarga y redirigir     |
-| GET    | `/folders`                    | Árbol de carpetas                  |
-| GET    | `/folders/:id`                | Documentos de una carpeta          |
-| GET    | `/categories`                 | Listado de categorías              |
-| GET    | `/categories/:id`             | Documentos de una categoría        |
-| GET    | `/search?q=...`               | Búsqueda con filtros               |
-| GET    | `/api/documents`              | API REST — todos los documentos    |
-| GET    | `/api/documents/:id`          | API REST — documento por ID        |
-| POST   | `/api/documents`              | API REST — crear                   |
-| PUT    | `/api/documents/:id`          | API REST — actualizar              |
-| DELETE | `/api/documents/:id`          | API REST — eliminar                |
-| GET    | `/api/categories`             | API REST — categorías              |
-| GET    | `/api/folders`                | API REST — árbol de carpetas       |
+> ★ = archivos actualizados/generados en esta iteración
 
 ---
 
-## 🗄️ Cómo actualizar la base de datos
+## 🔗 Google Drive — Cómo funciona
 
-Abre `src/database/db.json` y editá directamente el array `documents`:
+Los documentos **no se alojan en el servidor**: solo se guarda el `driveId` en `db.json`.
+
+| Acción | URL generada automáticamente |
+|--------|------------------------------|
+| **Vista previa** (iframe) | `https://drive.google.com/file/d/{driveId}/preview` |
+| **Descarga directa** | `https://drive.google.com/uc?export=download&id={driveId}` |
+| **Abrir en Drive** | `https://drive.google.com/file/d/{driveId}/view` |
+
+### ¿Cómo obtengo el driveId?
+En el link de Drive: `drive.google.com/file/d/`**`1BxiMVs0XRA5nFMdK`**`/view`  
+El código entre `/d/` y `/view` es el ID.
+
+### Permisos requeridos
+El archivo en Drive debe tener configurado:  
+> **"Cualquier persona con el enlace" → puede ver**
+
+---
+
+## 🗄️ Agregar un documento a db.json
 
 ```json
 {
   "id": "doc-010",
-  "title": "Mi nuevo documento",
-  "slug": "mi-nuevo-documento",
-  "description": "Descripción del documento.",
+  "title": "Reglamento interno 2024",
+  "slug": "reglamento-interno-2024",
+  "description": "Normativa vigente del establecimiento.",
   "categoryId": "cat-001",
   "folderId": "fld-002",
   "fileType": "PDF",
-  "driveId": "PEGAR_EL_ID_DE_DRIVE_AQUI",
-  "driveUrl": "https://drive.google.com/file/d/PEGAR_EL_ID_DE_DRIVE_AQUI/view",
-  "tags": ["etiqueta1", "etiqueta2"],
+  "driveId": "1BxiMVs0XRA5nFMdKvw2Jk",
+  "driveUrl": "https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvw2Jk/view",
+  "tags": ["reglamento", "2024"],
   "status": "active",
   "featured": false,
   "downloadCount": 0,
@@ -140,22 +142,35 @@ Abre `src/database/db.json` y editá directamente el array `documents`:
 }
 ```
 
-**¿Cómo obtengo el driveId?**  
-En el link de Drive: `drive.google.com/file/d/`**`1BxiMVs0XRA5nFMdK`**`/view`  
-Ese código entre `/d/` y `/view` es el ID.
-
-**Importante:** El archivo en Drive debe tener permisos de "Cualquier persona con el enlace puede ver" para que el iframe de preview funcione.
+> El formulario en `/documents/new` completa `driveUrl` automáticamente al ingresar el `driveId`.
 
 ---
 
-## 🧩 Cómo agregar una nueva entidad
+## 🔗 Rutas disponibles
 
-1. Crear el modelo en `src/models/MiEntidad.js` extendiendo `BaseModel`
-2. Crear el repositorio en `src/repositories/MiEntidadRepository.js` extendiendo `BaseRepository`
-3. Crear el controlador en `src/controllers/MiEntidadController.js`
-4. Registrar las rutas en `src/routes/miEntidadRoutes.js` y en `app.js`
-5. Crear las vistas en `views/mi-entidad/`
-6. Agregar la colección en `src/database/db.json`
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/` | Dashboard principal |
+| GET | `/documents` | Listado con filtros |
+| GET | `/documents/new` | Formulario nuevo |
+| POST | `/documents` | Crear documento |
+| GET | `/documents/:id` | Preview Drive + metadatos |
+| GET | `/documents/:id/edit` | Formulario edición |
+| PUT | `/documents/:id` | Actualizar |
+| DELETE | `/documents/:id` | Archivar |
+| GET | `/documents/:id/download` | Registrar descarga → redirige a Drive |
+| GET | `/folders` | Árbol de carpetas |
+| GET | `/folders/:id` | Documentos de una carpeta |
+| GET | `/categories` | Grilla de categorías |
+| GET | `/categories/:id` | Documentos de una categoría |
+| GET | `/search?q=...` | Búsqueda con filtros |
+| GET | `/api/documents` | API REST · todos los docs |
+| GET | `/api/documents/:id` | API REST · doc por ID |
+| POST | `/api/documents` | API REST · crear |
+| PUT | `/api/documents/:id` | API REST · actualizar |
+| DELETE | `/api/documents/:id` | API REST · eliminar |
+| GET | `/api/categories` | API REST · categorías |
+| GET | `/api/folders` | API REST · árbol |
 
 ---
 
@@ -165,3 +180,12 @@ Ese código entre `/d/` y `/view` es el ID.
 PORT=3000
 NODE_ENV=development
 ```
+
+---
+
+## 🎨 Diseño
+
+- **Tema**: Dark editorial con acentos dorados (`#f0c87a`)
+- **Tipografía**: Lora (serif) + Space Mono (mono)
+- **Responsive**: sidebar colapsable en mobile
+- **Accesible**: `role="search"`, `aria-label`, navegación por teclado (`/` para buscar)

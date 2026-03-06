@@ -1,27 +1,49 @@
-<!-- views/documents/show.ejs -->
+<%# views/documents/show.ejs — Detalle + preview de Drive %>
+
 <div class="doc-show-layout">
 
-  <!-- ── Panel izquierdo: Iframe preview ── -->
+  <!-- ── Panel izquierdo: Preview Drive ─────────────────── -->
   <div class="doc-preview-panel">
     <div class="preview-header">
-      <span class="preview-label">Vista previa</span>
-      <a href="<%= doc.driveUrl %>" target="_blank" class="preview-open-link">Abrir en Drive ↗</a>
+      <span class="preview-label">📄 Vista previa · Google Drive</span>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span
+          class="drive-badge"
+          data-copy="<%= doc.driveUrl %>"
+          style="cursor:pointer;"
+          title="Copiar link">
+          🔗 Copiar link
+        </span>
+        <a href="<%= doc.driveUrl %>" target="_blank" rel="noopener" class="preview-open-link">
+          Abrir en Drive ↗
+        </a>
+      </div>
     </div>
+
     <div class="preview-frame-wrap">
+      <!-- Spinner mientras carga el iframe -->
+      <div class="preview-loading">
+        <div class="preview-spinner"></div>
+        <span>Cargando desde Google Drive…</span>
+      </div>
+
       <iframe
         src="<%= doc.previewUrl %>"
         class="preview-iframe"
         allow="autoplay"
-        title="<%= doc.title %>"
+        title="Vista previa: <%= doc.title %>"
+        loading="lazy"
       ></iframe>
     </div>
   </div>
 
-  <!-- ── Panel derecho: Metadatos ── -->
+  <!-- ── Panel derecho: Metadatos ───────────────────────── -->
   <aside class="doc-meta-panel">
-    <!-- Tipo de archivo -->
-    <div class="meta-type-badge" style="background:<%= doc.fileTypeMeta.color %>1a;border-color:<%= doc.fileTypeMeta.color %>44">
-      <span style="color:<%= doc.fileTypeMeta.color %>"><%= doc.fileTypeMeta.icon %> <%= doc.fileType %></span>
+
+    <!-- Badge tipo de archivo -->
+    <div class="meta-type-badge"
+      style="background:<%= doc.fileTypeMeta.color %>1a; border-color:<%= doc.fileTypeMeta.color %>44; color:<%= doc.fileTypeMeta.color %>">
+      <%= doc.fileTypeMeta.icon %> <%= doc.fileType %>
     </div>
 
     <h1 class="meta-title"><%= doc.title %></h1>
@@ -29,42 +51,53 @@
 
     <!-- Acciones principales -->
     <div class="meta-actions">
-      <a href="/documents/<%= doc.id %>/download" class="btn-dl-primary">⬇ Descargar</a>
-      <a href="<%= doc.driveUrl %>" target="_blank" class="btn-dl-secondary">🔗 Ver en Drive</a>
+      <a href="/documents/<%= doc.id %>/download" class="btn-dl-primary">
+        ⬇ Descargar desde Drive
+      </a>
+      <a href="<%= doc.driveUrl %>" target="_blank" rel="noopener" class="btn-dl-secondary">
+        🔗 Ver en Google Drive
+      </a>
     </div>
 
     <!-- Detalles -->
     <div class="meta-section">
       <div class="meta-section-title">Detalles</div>
       <div class="meta-table">
+
         <% if (doc.category) { %>
         <div class="meta-row">
           <span class="meta-key">Categoría</span>
-          <a href="/categories/<%= doc.categoryId %>" class="meta-val" style="color:<%= doc.category.color %>">
+          <a href="/categories/<%= doc.categoryId %>" class="meta-val"
+            style="color:<%= doc.category.color %>">
             <%= doc.category.icon %> <%= doc.category.name %>
           </a>
         </div>
         <% } %>
+
         <% if (doc.folder) { %>
         <div class="meta-row">
           <span class="meta-key">Carpeta</span>
           <a href="/folders/<%= doc.folderId %>" class="meta-val">
-            <%= doc.folder.icon %> <%= doc.folder.breadcrumbPath %>
+            <%= doc.folder.icon %> <%= doc.folder.breadcrumbPath || doc.folder.name %>
           </a>
         </div>
         <% } %>
+
         <div class="meta-row">
           <span class="meta-key">Tipo</span>
           <span class="meta-val"><%= doc.fileType %></span>
         </div>
+
         <div class="meta-row">
           <span class="meta-key">Descargas</span>
           <span class="meta-val"><%= doc.downloadCount %></span>
         </div>
+
         <div class="meta-row">
           <span class="meta-key">Agregado</span>
           <span class="meta-val"><%= doc.formattedDate %></span>
         </div>
+
       </div>
     </div>
 
@@ -72,34 +105,29 @@
     <% if (doc.tags && doc.tags.length > 0) { %>
     <div class="meta-section">
       <div class="meta-section-title">Etiquetas</div>
-      <div class="tags-list">
+      <div class="meta-tags">
         <% doc.tags.forEach(tag => { %>
-          <a href="/search?q=<%= tag %>" class="tag-item">#<%= tag %></a>
+          <a href="/search?q=<%= tag %>" class="meta-tag">#<%= tag %></a>
         <% }) %>
       </div>
     </div>
     <% } %>
 
-    <!-- Editar / Archivar -->
-    <div class="meta-section">
-      <a href="/documents/<%= doc.id %>/edit" class="btn-edit">✏️ Editar</a>
-      <form action="/documents/<%= doc.id %>?_method=DELETE" method="POST" style="display:inline">
-        <button type="submit" class="btn-archive" onclick="return confirm('¿Archivar este documento?')">📦 Archivar</button>
-      </form>
+    <!-- Acciones de gestión -->
+    <div class="meta-section" style="margin-top:auto;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <a href="/documents/<%= doc.id %>/edit" class="btn-secondary" style="font-size:11px; padding:7px 12px;">
+          ✏️ Editar
+        </a>
+        <form action="/documents/<%= doc.id %>?_method=DELETE" method="POST" style="display:inline;">
+          <button type="submit" class="btn-danger" style="font-size:11px; padding:7px 12px;"
+            data-confirm="¿Archivar este documento?">
+            🗄 Archivar
+          </button>
+        </form>
+      </div>
     </div>
-  </aside>
-</div>
 
-<!-- Documentos relacionados -->
-<% if (related.length > 0) { %>
-<section class="section" style="margin-top:3rem">
-  <div class="section-header">
-    <h2 class="section-title">Relacionados</h2>
-  </div>
-  <div class="doc-grid">
-    <% related.forEach(doc => { %>
-      <%- include('_card', { doc }) %>
-    <% }) %>
-  </div>
-</section>
-<% } %>
+  </aside>
+
+</div>

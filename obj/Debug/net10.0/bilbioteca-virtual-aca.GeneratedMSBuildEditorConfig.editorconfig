@@ -22,6 +22,10 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
+[C:/Users/lucas/OneDrive/Escritorio/biblioteca-digital/biblioteca-digital/bilbioteca-virtual-aca/views/documents/Show.cshtml]
+build_metadata.AdditionalFiles.TargetPath = dmlld3NcZG9jdW1lbnRzXFNob3cuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/lucas/OneDrive/Escritorio/biblioteca-digital/biblioteca-digital/bilbioteca-virtual-aca/views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = dmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -32,6 +36,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/lucas/OneDrive/Escritorio/biblioteca-digital/biblioteca-digital/bilbioteca-virtual-aca/views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = dmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/lucas/OneDrive/Escritorio/biblioteca-digital/biblioteca-digital/bilbioteca-virtual-aca/views/Shared/_DocumentCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = dmlld3NcU2hhcmVkXF9Eb2N1bWVudENhcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/lucas/OneDrive/Escritorio/biblioteca-digital/biblioteca-digital/bilbioteca-virtual-aca/views/Shared/_ValidationScriptsPartial.cshtml]

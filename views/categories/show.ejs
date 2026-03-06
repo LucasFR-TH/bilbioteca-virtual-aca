@@ -1,12 +1,38 @@
-<!-- views/categories/show.ejs -->
-<div class="page-header" style="border-left:4px solid <%= category.color %>; padding-left:1.5rem">
-  <h1 class="page-title"><%= category.icon %> <%= category.name %></h1>
-  <p class="page-subtitle"><%= category.description %></p>
+<%# views/categories/show.ejs — Documentos por categoría %>
+
+<div class="breadcrumb" style="margin-bottom:8px;">
+  <a href="/">Inicio</a> <span>›</span>
+  <a href="/categories">Categorías</a>
+  <span>›</span> <%= category.name %>
 </div>
-<% if (documents.length === 0) { %>
-  <div class="empty-state"><div class="empty-icon">📭</div><p>No hay documentos en esta categoría.</p></div>
-<% } else { %>
-  <div class="doc-grid">
-    <% documents.forEach(doc => { %><%- include('../documents/_card', { doc }) %><% }) %>
+
+<!-- Header de categoría -->
+<div class="folder-show-header" style="border-left:4px solid <%= category.color %>;">
+  <span class="folder-show-icon"><%= category.icon %></span>
+  <div>
+    <h1 class="folder-show-title"><%= category.name %></h1>
+    <% if (category.description) { %>
+      <p class="folder-show-meta"><%= category.description %></p>
+    <% } %>
+    <p class="folder-show-meta" style="margin-top:4px;">
+      <%= documents.length %> documento<%= documents.length !== 1 ? 's' : '' %>
+    </p>
   </div>
-<% } %>
+</div>
+
+<!-- Documentos -->
+<section class="section">
+  <% if (documents.length === 0) { %>
+    <div class="empty-state" style="padding:40px 0;">
+      <div class="empty-icon">📭</div>
+      <p>No hay documentos en esta categoría.</p>
+      <a href="/documents/new" class="btn-primary">Agregar documento</a>
+    </div>
+  <% } else { %>
+    <div class="doc-grid">
+      <% documents.forEach(doc => { %>
+        <%- include('../documents/_card', { doc }) %>
+      <% }) %>
+    </div>
+  <% } %>
+</section>

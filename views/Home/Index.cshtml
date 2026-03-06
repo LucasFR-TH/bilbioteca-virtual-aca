@@ -1,108 +1,122 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model bilbioteca_virtual_aca.Models.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Inicio";
 }
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title %> — Biblioteca Digital</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/main.css" />
-</head>
-<body>
+<!-- ── Hero ──────────────────────────────────────────────── -->
+<div class="page-hero">
+    <h1 class="page-title">📚 Biblioteca Digital</h1>
+    <p class="page-subtitle">Centro de acceso a documentos institucionales · desde Google Drive</p>
 
-  <!-- ── SIDEBAR ─────────────────────────────── -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-icon">📚</div>
-      <div>
-        <div class="logo-title">Biblioteca</div>
-        <div class="logo-sub">Digital Archive</div>
-      </div>
-    </div>
-
-    <!-- Estadísticas rápidas -->
-    <% if (typeof stats !== 'undefined' && stats) { %>
-    <div class="sidebar-stats">
-      <div class="stat-chip"><span class="stat-num"><%= stats.active %></span><span class="stat-label">Docs</span></div>
-      <div class="stat-chip"><span class="stat-num"><%= stats.totalDownloads %></span><span class="stat-label">Descargas</span></div>
-    </div>
-    <% } %>
-
-    <!-- Nav principal -->
-    <nav class="sidebar-nav">
-      <a href="/" class="nav-item <%= currentPath === '/' ? 'active' : '' %>">
-        <span>🏠</span> Inicio
-      </a>
-      <a href="/documents" class="nav-item <%= currentPath.startsWith('/documents') ? 'active' : '' %>">
-        <span>📄</span> Documentos
-      </a>
-      <a href="/folders" class="nav-item <%= currentPath.startsWith('/folders') ? 'active' : '' %>">
-        <span>📁</span> Carpetas
-      </a>
-      <a href="/categories" class="nav-item <%= currentPath.startsWith('/categories') ? 'active' : '' %>">
-        <span>🏷️</span> Categorías
-      </a>
-      <a href="/search" class="nav-item <%= currentPath.startsWith('/search') ? 'active' : '' %>">
-        <span>🔍</span> Búsqueda avanzada
-      </a>
-    </nav>
-
-    <!-- Árbol de carpetas -->
-    <% if (typeof folderTree !== 'undefined' && folderTree) { %>
-    <div class="folder-tree">
-      <div class="tree-label">CARPETAS</div>
-      <% folderTree.forEach(folder => { %>
-        <div class="tree-root">
-          <a href="/folders/<%= folder.id %>" class="tree-node root-node">
-            <span class="toggle-arrow">▶</span>
-            <span><%= folder.icon %></span>
-            <span class="node-name"><%= folder.name %></span>
-            <span class="node-dot" style="background:<%= folder.color %>"></span>
-          </a>
-          <% if (folder.children && folder.children.length) { %>
-            <div class="tree-children">
-              <% folder.children.forEach(child => { %>
-                <a href="/folders/<%= child.id %>" class="tree-node child-node">
-                  <span><%= child.icon %></span>
-                  <span class="node-name"><%= child.name %></span>
-                </a>
-              <% }) %>
-            </div>
-          <% } %>
+    <div class="hero-stats">
+        <div class="hstat">
+            <span class="hstat-num">@Model.Stats.Active</span>
+            <span class="hstat-label">Documentos</span>
         </div>
-      <% }) %>
+        <div class="hstat">
+            <span class="hstat-num">@Model.Categories.Count</span>
+            <span class="hstat-label">Categorías</span>
+        </div>
+        <div class="hstat">
+            <span class="hstat-num">@Model.Stats.TotalDownloads</span>
+            <span class="hstat-label">Descargas</span>
+        </div>
     </div>
-    <% } %>
 
-    <div class="sidebar-footer">
-      <a href="/documents/new" class="btn-new-doc">+ Nuevo Documento</a>
+    <div class="hero-divider">
+        <div class="hero-divider-dot"></div>
+        <div class="hero-divider-dot"></div>
+        <div class="hero-divider-dot"></div>
     </div>
-  </aside>
+</div>
 
-  <!-- ── MAIN ─────────────────────────────────── -->
-  <div class="layout">
-    <!-- Topbar -->
-    <header class="topbar">
-      <button class="sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-      <form action="/search" method="GET" class="search-form">
-        <span class="search-icon">🔍</span>
-        <input type="text" name="q" placeholder="Buscar documentos..." class="search-input" />
-        <button type="submit" class="search-btn">Buscar</button>
-      </form>
-      <a href="/api/documents" class="topbar-api-link" target="_blank">⚡ API</a>
-    </header>
+<!-- ── Buscador ───────────────────────────────────────────── -->
+<div class="home-search-wrap">
+    <form asp-controller="Search" asp-action="Index" method="get" class="home-search-form" role="search">
+        <input type="text" name="q"
+               placeholder="Buscar por título, etiqueta, categoría…"
+               class="home-search-input" autofocus autocomplete="off" />
+        <button type="submit" class="home-search-btn">🔍 Buscar</button>
+    </form>
+</div>
 
-    <!-- Contenido principal -->
-    <main class="main-content">
-      <%- body %>
-    </main>
-  </div>
+<!-- Badge Google Drive -->
+<div style="text-align:center; margin-bottom:36px;">
+    <span class="drive-badge">
+        <svg width="12" height="12" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg">
+            <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+            <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>
+            <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
+            <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+            <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+            <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+        </svg>
+        Documentos alojados en Google Drive
+    </span>
+</div>
 
-  <script src="/js/main.js"></script>
-</body>
-</html>
+<!-- ── Categorías ─────────────────────────────────────────── -->
+@if (Model.Categories != null && Model.Categories.Any())
+{
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Categorías</h2>
+            <a href="@Url.Action("Index","Categories")" class="section-link">Ver todas →</a>
+        </div>
+        <div class="category-grid">
+            @foreach (var cat in Model.Categories)
+            {
+                <a href="@Url.Action("Show","Categories", new { id = cat.Id })"
+                   class="category-card" style="--cat-color:@cat.Color">
+                    <span class="cat-icon">@cat.Icon</span>
+                    <span class="cat-name">@cat.Name</span>
+                    <span class="cat-count">@cat.DocumentCount docs</span>
+                    <div class="cat-bar"></div>
+                </a>
+            }
+        </div>
+    </section>
+}
 
+<!-- ── Documentos destacados ──────────────────────────────── -->
+@if (Model.Featured != null && Model.Featured.Any())
+{
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">⭐ Destacados</h2>
+            <a href="@Url.Action("Index","Documents")" class="section-link">Ver todos →</a>
+        </div>
+        <div class="doc-grid">
+            @foreach (var doc in Model.Featured)
+            {
+                @await Html.PartialAsync("_DocumentCard", doc)
+            }
+        </div>
+    </section>
+}
+
+<!-- ── Recientes ──────────────────────────────────────────── -->
+@if (Model.Recent != null && Model.Recent.Any())
+{
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">🕐 Agregados recientemente</h2>
+            <a href="@Url.Action("Index","Documents")" class="section-link">Ver todos →</a>
+        </div>
+        <div class="doc-grid">
+            @foreach (var doc in Model.Recent)
+            {
+                @await Html.PartialAsync("_DocumentCard", doc)
+            }
+        </div>
+    </section>
+}
+
+@if ((Model.Featured == null || !Model.Featured.Any()) && (Model.Recent == null || !Model.Recent.Any()))
+{
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>Todavía no hay documentos cargados.</p>
+        <a href="@Url.Action("Create","Documents")" class="btn-primary">+ Agregar el primero</a>
+    </div>
+}

@@ -1,100 +1,149 @@
-<!-- views/documents/form.ejs -->
-<div class="form-page">
-  <div class="form-header">
-    <h1 class="page-title"><%= title %></h1>
-    <a href="/documents" class="btn-back">← Volver</a>
-  </div>
+<%# views/documents/form.ejs — Crear / Editar documento %>
 
-  <% if (errors && errors.length > 0) { %>
-    <div class="alert-error">
-      <% errors.forEach(e => { %><p>⚠️ <%= e %></p><% }) %>
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="/">Inicio</a> <span>›</span>
+      <a href="/documents">Documentos</a> <span>›</span>
+      <%= doc ? 'Editar' : 'Nuevo documento' %>
     </div>
-  <% } %>
+    <h1 class="page-title"><%= doc ? '✏️ Editar documento' : '＋ Nuevo documento' %></h1>
+  </div>
+</div>
 
-  <form action="<%= formAction %>" method="<%= formMethod %>" class="doc-form">
+<div class="form-wrap">
+  <form
+    action="<%= doc ? `/documents/${doc.id}?_method=PUT` : '/documents' %>"
+    method="POST"
+  >
 
-    <div class="form-grid">
-      <!-- Título -->
+    <!-- Sección principal -->
+    <div class="form-section">
+
       <div class="form-group full">
         <label class="form-label">Título *</label>
-        <input type="text" name="title" class="form-input" required
-               value="<%= doc ? doc.title : '' %>" placeholder="Título del documento" />
+        <input
+          type="text"
+          name="title"
+          class="form-input"
+          value="<%= doc ? doc.title : '' %>"
+          placeholder="Reglamento de convivencia 2024…"
+          required
+        />
       </div>
 
-      <!-- Descripción -->
       <div class="form-group full">
         <label class="form-label">Descripción</label>
-        <textarea name="description" class="form-textarea" rows="3"
-                  placeholder="Breve descripción del contenido..."><%= doc ? doc.description : '' %></textarea>
+        <textarea
+          name="description"
+          class="form-textarea"
+          placeholder="Breve descripción del documento…"
+        ><%= doc ? doc.description : '' %></textarea>
       </div>
 
-      <!-- Categoría -->
       <div class="form-group">
         <label class="form-label">Categoría *</label>
         <select name="categoryId" class="form-select" required>
-          <option value="">Seleccionar categoría...</option>
+          <option value="">— Seleccionar —</option>
           <% categories.forEach(cat => { %>
-            <option value="<%= cat.id %>" <%= doc && doc.categoryId === cat.id ? 'selected' : '' %>>
+            <option value="<%= cat.id %>"
+              <%= doc && doc.categoryId === cat.id ? 'selected' : '' %>>
               <%= cat.icon %> <%= cat.name %>
             </option>
           <% }) %>
         </select>
       </div>
 
-      <!-- Carpeta -->
       <div class="form-group">
         <label class="form-label">Carpeta *</label>
         <select name="folderId" class="form-select" required>
-          <option value="">Seleccionar carpeta...</option>
-          <% folders.forEach(f => { %>
-            <option value="<%= f.id %>" <%= doc && doc.folderId === f.id ? 'selected' : '' %>>
-              <%= f.icon %> <%= f.name %>
+          <option value="">— Seleccionar —</option>
+          <% folders.forEach(folder => { %>
+            <option value="<%= folder.id %>"
+              <%= doc && doc.folderId === folder.id ? 'selected' : '' %>>
+              <%= folder.icon %> <%= folder.name %>
             </option>
           <% }) %>
         </select>
       </div>
 
-      <!-- Tipo de archivo -->
       <div class="form-group">
-        <label class="form-label">Tipo de archivo</label>
-        <select name="fileType" class="form-select">
-          <% fileTypes.forEach(ft => { %>
-            <option value="<%= ft %>" <%= doc && doc.fileType === ft ? 'selected' : '' %>><%= ft %></option>
+        <label class="form-label">Tipo de archivo *</label>
+        <select name="fileType" class="form-select" required>
+          <% ['PDF','DOCX','XLSX','PPTX','DOC','XLS'].forEach(ft => { %>
+            <option value="<%= ft %>"
+              <%= doc && doc.fileType === ft ? 'selected' : '' %>><%= ft %></option>
           <% }) %>
         </select>
       </div>
 
-      <!-- Google Drive ID -->
-      <div class="form-group">
-        <label class="form-label">ID de Google Drive *</label>
-        <input type="text" name="driveId" class="form-input"
-               value="<%= doc ? doc.driveId : '' %>"
-               placeholder="1BxiMVs0XRA5nFMdK..." />
-        <small class="form-hint">Encontralo en: drive.google.com/file/d/<strong>[ESTE_ID]</strong>/view</small>
+    </div>
+
+    <!-- Sección Google Drive -->
+    <div style="background:var(--bg2); border:1px solid rgba(26,115,232,0.25); border-radius:var(--radius-lg); padding:20px; margin-bottom:24px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+        <span class="drive-badge">🔗 Google Drive</span>
+        <span style="font-size:12px; color:var(--text4); font-family:var(--font-mono);">
+          El archivo debe ser público ("Cualquier persona con el enlace puede ver")
+        </span>
       </div>
 
-      <!-- Tags -->
+      <div class="form-section">
+        <div class="form-group full">
+          <label class="form-label">ID de Google Drive *</label>
+          <input
+            type="text"
+            name="driveId"
+            class="form-input"
+            value="<%= doc ? doc.driveId : '' %>"
+            placeholder="1BxiMVs0XRA5nFMdKvw2Jk..."
+            required
+          />
+          <small class="form-hint">
+            Encontralo en: drive.google.com/file/d/<strong style="color:var(--accent)">[ESTE_ID]</strong>/view
+          </small>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label">URL de Drive (se completa automáticamente)</label>
+          <input
+            type="text"
+            name="driveUrl"
+            class="form-input"
+            value="<%= doc ? doc.driveUrl : '' %>"
+            placeholder="https://drive.google.com/file/d/…/view"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección extras -->
+    <div class="form-section">
       <div class="form-group full">
         <label class="form-label">Etiquetas</label>
-        <input type="text" name="tags" class="form-input"
-               value="<%= doc && doc.tags ? doc.tags.join(', ') : '' %>"
-               placeholder="reglamento, 2024, normativa (separadas por coma)" />
+        <input
+          type="text"
+          name="tags"
+          class="form-input"
+          value="<%= doc && doc.tags ? doc.tags.join(', ') : '' %>"
+          placeholder="reglamento, 2024, normativa  (separadas por coma)"
+        />
       </div>
 
-      <!-- Destacado -->
       <div class="form-group">
         <label class="form-check">
           <input type="checkbox" name="featured" <%= doc && doc.featured ? 'checked' : '' %> />
-          <span>Marcar como destacado</span>
+          <span>⭐ Marcar como destacado</span>
         </label>
       </div>
     </div>
 
     <div class="form-actions">
       <button type="submit" class="btn-primary btn-submit">
-        <%= doc && doc.id ? '💾 Guardar cambios' : '✚ Crear documento' %>
+        <%= doc ? '💾 Guardar cambios' : '✚ Crear documento' %>
       </button>
       <a href="/documents" class="btn-cancel">Cancelar</a>
     </div>
+
   </form>
 </div>

@@ -1,28 +1,45 @@
-<!-- views/documents/_card.ejs — Partial: tarjeta de documento -->
-<div class="doc-card" style="--doc-color:<%= doc.category ? doc.category.color : '#7a7068' %>">
+<%# views/documents/_card.ejs — Tarjeta de documento (reutilizable) %>
+<div class="doc-card" style="--doc-color:<%= doc.category ? doc.category.color : '#f0c87a' %>">
+
+  <!-- Barra de color superior -->
   <div class="doc-card-bar"></div>
+
+  <!-- Header: tipo de archivo -->
   <div class="doc-card-header">
-    <span class="doc-type-badge" style="background:<%= doc.fileTypeMeta.color %>22;color:<%= doc.fileTypeMeta.color %>;border-color:<%= doc.fileTypeMeta.color %>44">
+    <span class="doc-type-badge"
+      style="background:<%= doc.fileTypeMeta.color %>22; color:<%= doc.fileTypeMeta.color %>; border-color:<%= doc.fileTypeMeta.color %>44">
       <%= doc.fileType %>
     </span>
     <span class="doc-type-icon"><%= doc.fileTypeMeta.icon %></span>
   </div>
+
+  <!-- Cuerpo: título y descripción -->
   <div class="doc-card-body">
     <h3 class="doc-card-title">
       <a href="/documents/<%= doc.id %>"><%= doc.title %></a>
     </h3>
     <p class="doc-card-desc"><%= doc.excerpt %></p>
   </div>
+
+  <!-- Meta: categoría + fecha -->
   <div class="doc-card-meta">
     <% if (doc.category) { %>
-      <span class="doc-cat-tag" style="background:<%= doc.category.color %>1a;color:<%= doc.category.color %>">
+      <span class="doc-cat-tag"
+        style="background:<%= doc.category.color %>1a; color:<%= doc.category.color %>; border-color:<%= doc.category.color %>33">
         <%= doc.category.icon %> <%= doc.category.name %>
       </span>
     <% } %>
     <span class="doc-date"><%= doc.formattedDate %></span>
   </div>
+
+  <!-- Acciones rápidas -->
   <div class="doc-card-actions">
-    <a href="/documents/<%= doc.id %>" class="btn-preview">👁 Ver</a>
-    <a href="/documents/<%= doc.id %>/download" class="btn-download">⬇ Descargar</a>
+    <a href="/documents/<%= doc.id %>" class="btn-preview" title="Vista previa">
+      👁 Ver
+    </a>
+    <a href="/documents/<%= doc.id %>/download" class="btn-download" title="Descargar desde Drive">
+      ⬇ Descargar
+    </a>
   </div>
+
 </div>

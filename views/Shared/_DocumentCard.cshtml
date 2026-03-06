@@ -1,0 +1,40 @@
+@model bilbioteca_virtual_aca.Models.ViewModels.DocumentViewModel
+@{
+    var docColor = Model.CategoryColor ?? "#f0c87a";
+    var typeColor = Model.FileTypeColor ?? "#f0c87a";
+}
+
+<div class="doc-card" style="--doc-color:@docColor">
+    <div class="doc-card-bar"></div>
+
+    <div class="doc-card-header">
+        <span class="doc-type-badge"
+              style="background:@(typeColor)22; color:@typeColor; border-color:@(typeColor)44">
+            @Model.FileType
+        </span>
+        <span class="doc-type-icon">@Model.FileTypeIcon</span>
+    </div>
+
+    <div class="doc-card-body">
+        <h3 class="doc-card-title">
+            <a href="@Url.Action("Show","Documents", new { id = Model.Id })">@Model.Title</a>
+        </h3>
+        <p class="doc-card-desc">@Model.Excerpt</p>
+    </div>
+
+    <div class="doc-card-meta">
+        @if (!string.IsNullOrEmpty(Model.CategoryName))
+        {
+            <span class="doc-cat-tag"
+                  style="background:@(docColor)1a; color:@docColor; border-color:@(docColor)33">
+                @Model.CategoryIcon @Model.CategoryName
+            </span>
+        }
+        <span class="doc-date">@Model.FormattedDate</span>
+    </div>
+
+    <div class="doc-card-actions">
+        <a href="@Url.Action("Show","Documents", new { id = Model.Id })" class="btn-preview">👁 Ver</a>
+        <a href="@Url.Action("Download","Documents", new { id = Model.Id })" class="btn-download">⬇ Descargar</a>
+    </div>
+</div>
