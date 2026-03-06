@@ -1,0 +1,200 @@
+@model bilbioteca_virtual_aca.Models.ViewModels.SectionShowViewModel
+@{
+    ViewData["Title"] = Model.Section.Label;
+}
+
+<!-- ── Breadcrumb ─────────────────────────────────────────── -->
+<nav class="breadcrumb" aria-label="Navegación">
+    <a href="@Url.Action("Index","Sections")" class="bc-link">Secciones</a>
+    @foreach (var crumb in Model.Breadcrumb)
+    {
+        <span class="bc-sep">›</span>
+        @if (crumb.Url is not null)
+        {
+            <a href="@crumb.Url" class="bc-link">@crumb.Label</a>
+        }
+        else
+        {
+            <span class="bc-current">@crumb.Label</span>
+        }
+    }
+</nav>
+
+<!-- ── Encabezado ────────────────────────────────────────── -->
+<div class="section-header" style="--sec-color:@Model.Section.Color">
+    <span class="section-header__emoji">@Model.Section.Emoji</span>
+    <div style="flex:1">
+        <h1 class="section-header__title">@ViewData["Title"]</h1>
+        @if (!Model.NotConfigured)
+        {
+            <p class="section-header__meta">
+                @Model.Subfolders.Count carpeta@(Model.Subfolders.Count != 1 ? "s" : "") ·
+                @Model.Documents.Count documento@(Model.Documents.Count != 1 ? "s" : "")
+            </p>
+        }
+    </div>
+    <button class="btn-refresh"
+            onclick="refreshCache('@Model.Section.Id')"
+            title="Recargar desde Drive">🔄</button>
+</div>
+
+<!-- ── Error de Drive ─────────────────────────────────────── -->
+@if (ViewBag.DriveError is not null)
+{
+    <div class="alert-error">
+        ⚠️ Error al conectar con Drive: <code>@ViewBag.DriveError</code>
+        <br/>Verificá que la <strong>GoogleApiKey</strong> esté configurada y que la carpeta sea pública.
+    </div>
+}
+
+<!-- ── Sin configurar ─────────────────────────────────────── -->
+@if (Model.NotConfigured)
+{
+    <div class="empty-state">
+        <span style="font-size:3rem">⚙️</span>
+        <p>Esta sección aún no tiene un Folder ID de Drive configurado.</p>
+        <p>Abrí <code>Models/SectionConfig.cs</code> y reemplazá <code>"FOLDER_ID_AQUI"</code> con el ID real.</p>
+    </div>
+}
+else
+{
+    <!-- ── Subcarpetas ─────────────────────────────────────── -->
+    @if (Model.Subfolders.Any())
+    {
+        <section class="content-section">
+            <h2 class="content-section__title">📁 Carpetas</h2>
+            <div class="folder-grid">
+                @foreach (var folder in Model.Subfolders)
+                {
+                    <a href="@Url.Action("Subfolder","Sections", new { id = Model.Section.Id, folderId = folder.Id, name = folder.Name })"
+                       class="folder-card">
+                        <span class="folder-card__icon">📁</span>
+                        <span class="folder-card__name">@folder.Name</span>
+                        <span class="folder-card__meta">@folder.ModifiedLabel</span>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+
+    <!-- ── Documentos ─────────────────────────────────────── -->
+    @if (Model.Documents.Any())
+    {
+        <section class="content-section">
+            <h2 class="content-section__title">📄 Documentos</h2>
+            <div class="doc-table">
+                <div class="doc-table__head">
+                    <span>Nombre</span>
+                    <span>Tipo</span>
+                    <span>Modificado</span>
+                    <span>Tamaño</span>
+                    <span></span>
+                </div>
+                @foreach (var doc in Model.Documents)
+                {
+                    <div class="doc-table__row">
+                        <span class="doc-table__name">
+                            <span style="color:@doc.TypeColor">@doc.TypeIcon</span>
+                            @doc.Name
+                        </span>
+                        <span class="doc-table__badge"
+                              style="background:@(doc.TypeColor)22; color:@doc.TypeColor">
+                            @doc.TypeLabel
+                        </span>
+                        <span class="doc-table__date">@doc.ModifiedLabel</span>
+                        <span class="doc-table__size">@(doc.Size ?? "—")</span>
+                        <span class="doc-table__actions">
+                            <a href="@doc.ViewUrl"    target="_blank" class="doc-btn" title="Ver en Drive">👁</a>
+                            <a href="@doc.DownloadUrl" target="_blank" class="doc-btn" title="Descargar">⬇</a>
+                        </span>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @if (!Model.Subfolders.Any() && !Model.Documents.Any())
+    {
+        <div class="empty-state">
+            <span style="font-size:3rem">📭</span>
+            <p>Esta carpeta está vacía o sus archivos no son públicos en Drive.</p>
+        </div>
+    }
+}
+
+@section Styles {
+<style>
+/* Breadcrumb */
+.breadcrumb { display:flex; align-items:center; gap:6px; font-size:.85rem; color:var(--text4,#888); margin-bottom:24px; flex-wrap:wrap; }
+.bc-link { color:var(--accent,#f0c87a); text-decoration:none; }
+.bc-link:hover { text-decoration:underline; }
+.bc-sep { opacity:.5; }
+.bc-current { color:var(--text1,#fff); }
+
+/* Header */
+.section-header { display:flex; align-items:center; gap:16px; margin-bottom:32px; padding:20px 24px; background:var(--bg2,#1e1e2e); border-radius:16px; border-left:4px solid var(--sec-color); }
+.section-header__emoji { font-size:2.2rem; }
+.section-header__title { font-size:1.4rem; font-weight:700; color:var(--sec-color); margin:0 0 4px; }
+.section-header__meta  { font-size:.82rem; color:var(--text4,#888); margin:0; }
+.btn-refresh { background:none; border:1px solid rgba(255,255,255,.1); border-radius:8px; padding:6px 10px; cursor:pointer; font-size:1rem; color:inherit; transition:background .15s; }
+.btn-refresh:hover { background:rgba(255,255,255,.08); }
+
+/* Alert */
+.alert-error { background:rgba(239,83,80,.12); border:1px solid rgba(239,83,80,.3); border-radius:10px; padding:16px 20px; margin-bottom:24px; font-size:.88rem; }
+
+/* Secciones */
+.content-section { margin-bottom:40px; }
+.content-section__title { font-size:1rem; font-weight:600; color:var(--text3,#ccc); margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.06); }
+
+/* Folder grid */
+.folder-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:12px; }
+.folder-card { display:flex; flex-direction:column; gap:6px; padding:16px; background:var(--bg2,#1e1e2e); border:1px solid rgba(255,255,255,.06); border-radius:12px; text-decoration:none; color:inherit; transition:transform .12s, border-color .12s; }
+.folder-card:hover { transform:translateY(-2px); border-color:#FFA726; }
+.folder-card__icon { font-size:1.5rem; }
+.folder-card__name { font-weight:600; font-size:.9rem; }
+.folder-card__meta { font-size:.75rem; color:var(--text4,#888); }
+
+/* Doc table */
+.doc-table { background:var(--bg2,#1e1e2e); border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,.06); }
+.doc-table__head,
+.doc-table__row { display:grid; grid-template-columns:1fr 80px 110px 70px 80px; align-items:center; padding:10px 16px; gap:12px; }
+.doc-table__head { font-size:.75rem; font-weight:600; color:var(--text4,#888); text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid rgba(255,255,255,.06); }
+.doc-table__row { font-size:.88rem; border-bottom:1px solid rgba(255,255,255,.04); transition:background .1s; }
+.doc-table__row:hover { background:rgba(255,255,255,.03); }
+.doc-table__row:last-child { border-bottom:none; }
+.doc-table__name  { display:flex; align-items:center; gap:8px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.doc-table__badge { font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:20px; text-align:center; }
+.doc-table__date,
+.doc-table__size  { font-size:.8rem; color:var(--text4,#888); }
+.doc-table__actions { display:flex; gap:6px; justify-content:flex-end; }
+.doc-btn { background:rgba(255,255,255,.06); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; text-decoration:none; font-size:.85rem; transition:background .1s; }
+.doc-btn:hover { background:rgba(255,255,255,.14); }
+
+/* Empty state */
+.empty-state { text-align:center; padding:60px 20px; color:var(--text4,#888); display:flex; flex-direction:column; align-items:center; gap:12px; }
+.empty-state code { background:rgba(255,255,255,.06); padding:2px 8px; border-radius:4px; font-size:.85rem; }
+
+@@media(max-width:600px){
+    .doc-table__head, .doc-table__row { grid-template-columns:1fr 70px 80px; }
+    .doc-table__head span:nth-child(4),
+    .doc-table__head span:nth-child(5),
+    .doc-table__row .doc-table__size { display:none; }
+}
+</style>
+}
+
+@section Scripts {
+<script>
+async function refreshCache(sectionId) {
+    const btn = document.querySelector('.btn-refresh');
+    btn.textContent = '⏳';
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/Sections/RefreshCache/${sectionId}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) { btn.textContent = '✅'; setTimeout(() => location.reload(), 700); }
+        else { btn.textContent = '❌'; btn.disabled = false; }
+    } catch { btn.textContent = '❌'; btn.disabled = false; }
+}
+</script>
+}

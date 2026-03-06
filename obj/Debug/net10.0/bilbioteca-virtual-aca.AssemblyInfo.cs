@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("bilbioteca-virtual-aca")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5091662d6ff17a0e21ce63ee9a7e3ad851f1dd04")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+51508bf7d4a6f2764714e34d353526e2e4e3deea")]
 [assembly: System.Reflection.AssemblyProductAttribute("bilbioteca-virtual-aca")]
 [assembly: System.Reflection.AssemblyTitleAttribute("bilbioteca-virtual-aca")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

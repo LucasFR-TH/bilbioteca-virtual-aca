@@ -5,23 +5,8 @@
 
 <!-- ── Hero ──────────────────────────────────────────────── -->
 <div class="page-hero">
-    <h1 class="page-title">📚 Biblioteca Digital</h1>
-    <p class="page-subtitle">Centro de acceso a documentos institucionales · desde Google Drive</p>
-
-    <div class="hero-stats">
-        <div class="hstat">
-            <span class="hstat-num">@Model.Stats.Active</span>
-            <span class="hstat-label">Documentos</span>
-        </div>
-        <div class="hstat">
-            <span class="hstat-num">@Model.Categories.Count</span>
-            <span class="hstat-label">Categorías</span>
-        </div>
-        <div class="hstat">
-            <span class="hstat-num">@Model.Stats.TotalDownloads</span>
-            <span class="hstat-label">Descargas</span>
-        </div>
-    </div>
+    <h1 class="page-title">📚 Biblioteca Virtual Acción Cátolica</h1>
+    <p class="page-subtitle">Centro de archivos de Accion Catolica, Parroquia Nuestra Señora del Valle</p>
 
     <div class="hero-divider">
         <div class="hero-divider-dot"></div>
@@ -60,7 +45,7 @@
 {
     <section class="section">
         <div class="section-header">
-            <h2 class="section-title">Categorías</h2>
+            <h2 class="section-title">Secciones</h2>
             <a href="@Url.Action("Index","Categories")" class="section-link">Ver todas →</a>
         </div>
         <div class="category-grid">
@@ -78,7 +63,7 @@
     </section>
 }
 
-<!-- ── Documentos destacados ──────────────────────────────── -->
+@* <!-- ── Documentos destacados ──────────────────────────────── -->
 @if (Model.Featured != null && Model.Featured.Any())
 {
     <section class="section">
@@ -93,7 +78,7 @@
             }
         </div>
     </section>
-}
+} *@
 
 <!-- ── Recientes ──────────────────────────────────────────── -->
 @if (Model.Recent != null && Model.Recent.Any())
@@ -120,3 +105,20 @@
         <a href="@Url.Action("Create","Documents")" class="btn-primary">+ Agregar el primero</a>
     </div>
 }
+
+@*agrego un pie de pagina con información de contacto, e imagens png con escudos*@
+<footer class="page-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Contacto</h3>
+            <p>✉️ Email: accioncatolicapquidelvalle@gmail.com</p>
+        </div>
+        <div class="footer-section">
+            <h3>Redes Sociales</h3>
+            <p>🔗 <a href="https://www.instagram.com/accioncatolicavalleyb" target="_blank">Instagram</a></p>
+        </div>
+    </div>
+     <div class="footer-icons">
+        <img src="icons/logo_delvalle.png" alt="Escudo Parroquia" class="footer-icon" />
+        <img src="~/icons/aca_icon.png" alt="Escudo Acción Católica" class="footer-icon" />
+</footer>

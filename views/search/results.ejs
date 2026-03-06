@@ -1,62 +1,214 @@
-<%# views/search/results.ejs — Resultados de búsqueda %>
+<%# views/search/results.ejs — Buscador universal %>
 
-<!-- Header -->
-<div class="search-results-header">
-  <h1 class="search-query-display">
-    Resultados para <span>"<%= query %>"</span>
-  </h1>
-  <p class="search-meta">
-    <%= results.length %> documento<%= results.length !== 1 ? 's' : '' %> encontrado<%= results.length !== 1 ? 's' : '' %>
-  </p>
+<div class="search-page">
+
+  <!-- ── Formulario de búsqueda ─────────────────────────────── -->
+  <div class="search-box-wrap">
+    <h1 class="search-page__title">🔍 Buscar documentos</h1>
+
+    <form action="/search" method="GET" class="search-form" role="search">
+      <!-- Barra principal -->
+      <div class="search-main-row">
+        <input
+          type="text"
+          name="q"
+          value="<%= query %>"
+          placeholder="Nombre del documento…"
+          class="search-input"
+          autofocus
+          autocomplete="off"
+        />
+        <button type="submit" class="search-btn">Buscar</button>
+      </div>
+
+      <!-- Filtros avanzados -->
+      <details class="search-filters" <%= (filterSection || filterSubfolder || filterType) ? 'open' : '' %>>
+        <summary class="search-filters__toggle">⚙️ Filtros avanzados</summary>
+        <div class="search-filters__grid">
+
+          <!-- Sección -->
+          <div class="filter-group">
+            <label class="filter-label">Sección</label>
+            <select name="section" class="filter-select">
+              <option value="">Todas las secciones</option>
+              <% sections.forEach(s => { %>
+                <option value="<%= s.id %>"
+                  <%= filterSection === s.id ? 'selected' : '' %>>
+                  <%= s.emoji %> <%= s.label %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <!-- Subcarpeta (dinámica si hay resultados) -->
+          <div class="filter-group">
+            <label class="filter-label">Subcarpeta</label>
+            <% if (allFolders.length > 0) { %>
+              <select name="subfolder" class="filter-select">
+                <option value="">Todas las carpetas</option>
+                <% allFolders.forEach(f => { %>
+                  <option value="<%= f %>"
+                    <%= filterSubfolder === f ? 'selected' : '' %>>
+                    📁 <%= f %>
+                  </option>
+                <% }) %>
+              </select>
+            <% } else { %>
+              <input type="text" name="subfolder" class="filter-input"
+                     value="<%= filterSubfolder %>" placeholder="Nombre de carpeta" />
+            <% } %>
+          </div>
+
+          <!-- Tipo de archivo -->
+          <div class="filter-group">
+            <label class="filter-label">Tipo de archivo</label>
+            <% if (allTypes.length > 0) { %>
+              <select name="type" class="filter-select">
+                <option value="">Todos los tipos</option>
+                <% allTypes.forEach(t => { %>
+                  <option value="<%= t %>"
+                    <%= filterType === t ? 'selected' : '' %>><%= t %></option>
+                <% }) %>
+              </select>
+            <% } else { %>
+              <select name="type" class="filter-select">
+                <option value="">Todos los tipos</option>
+                <% ['PDF','DOCX','XLSX','PPTX','DOC','XLS'].forEach(t => { %>
+                  <option value="<%= t %>" <%= filterType === t ? 'selected' : '' %>><%= t %></option>
+                <% }) %>
+              </select>
+            <% } %>
+          </div>
+
+        </div>
+
+        <!-- Limpiar filtros -->
+        <% if (filterSection || filterSubfolder || filterType) { %>
+          <a href="/search?q=<%= encodeURIComponent(query) %>" class="clear-filters">
+            ✕ Limpiar filtros
+          </a>
+        <% } %>
+      </details>
+    </form>
+  </div>
+
+  <!-- ── Resultados ─────────────────────────────────────────── -->
+  <% if (!hasQuery) { %>
+    <div class="search-empty">
+      <span>🔍</span>
+      <p>Ingresá un término para buscar documentos en todas las secciones.</p>
+    </div>
+
+  <% } else if (results.length === 0) { %>
+    <div class="search-empty">
+      <span>📭</span>
+      <p>No se encontraron documentos para <strong>"<%= query %>"</strong>.</p>
+      <% if (filterSection || filterSubfolder || filterType) { %>
+        <p>Probá con menos filtros.</p>
+      <% } %>
+    </div>
+
+  <% } else { %>
+    <div class="search-results-header">
+      <span class="results-count"><strong><%= total %></strong> resultado<%= total !== 1 ? 's' : '' %></span>
+      <% if (query) { %><span class="results-query">para "<%= query %>"</span><% } %>
+    </div>
+
+    <div class="results-list">
+      <% results.forEach(doc => { %>
+        <div class="result-item">
+
+          <!-- Ícono tipo -->
+          <div class="result-item__icon"
+               style="background:<%= doc.typeColor %>22; color:<%= doc.typeColor %>">
+            <%= doc.typeIcon %>
+          </div>
+
+          <!-- Info principal -->
+          <div class="result-item__body">
+            <div class="result-item__name"><%= doc.name %></div>
+            <div class="result-item__meta">
+              <span class="result-badge"
+                    style="background:<%= doc.sectionColor %>22; color:<%= doc.sectionColor %>">
+                <%= doc.sectionEmoji %> <%= doc.sectionLabel %>
+              </span>
+              <% if (doc.folder && doc.folder !== doc.sectionLabel) { %>
+                <span class="result-folder">📁 <%= doc.folder %></span>
+              <% } %>
+              <span class="result-date"><%= doc.modifiedLabel %></span>
+              <% if (doc.size) { %><span class="result-size"><%= doc.size %></span><% } %>
+            </div>
+          </div>
+
+          <!-- Tipo -->
+          <span class="result-item__type"
+                style="background:<%= doc.typeColor %>22; color:<%= doc.typeColor %>">
+            <%= doc.typeLabel %>
+          </span>
+
+          <!-- Acciones -->
+          <div class="result-item__actions">
+            <a href="<%= doc.viewUrl %>"    target="_blank" class="doc-btn" title="Ver en Drive">👁</a>
+            <a href="<%= doc.downloadUrl %>" target="_blank" class="doc-btn" title="Descargar">⬇</a>
+          </div>
+
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
 </div>
 
-<!-- Filtros de búsqueda avanzada -->
-<form method="GET" action="/search" class="search-filters-bar">
-  <input
-    type="text"
-    name="q"
-    value="<%= query %>"
-    placeholder="Buscar…"
-    class="filter-input"
-    autocomplete="off"
-  />
+<style>
+.search-page { max-width: 860px; margin: 0 auto; }
+.search-page__title { font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; }
 
-  <select name="category" class="filter-select">
-    <option value="">Todas las categorías</option>
-    <% categories.forEach(cat => { %>
-      <option value="<%= cat.id %>"
-        <%= filters && filters.category === cat.id ? 'selected' : '' %>>
-        <%= cat.icon %> <%= cat.name %>
-      </option>
-    <% }) %>
-  </select>
+/* Search box */
+.search-box-wrap { background: var(--bg2,#1e1e2e); border-radius: 16px; padding: 24px; margin-bottom: 32px; border: 1px solid rgba(255,255,255,.06); }
+.search-main-row { display: flex; gap: 10px; margin-bottom: 0; }
+.search-input { flex: 1; padding: 12px 16px; background: var(--bg3,#16161e); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; color: inherit; font-size: 1rem; outline: none; transition: border-color .15s; }
+.search-input:focus { border-color: var(--accent,#f0c87a); }
+.search-btn { padding: 12px 24px; background: var(--accent,#f0c87a); color: #000; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: .95rem; transition: opacity .15s; }
+.search-btn:hover { opacity: .88; }
 
-  <select name="type" class="filter-select">
-    <option value="">Todos los tipos</option>
-    <% ['PDF','DOCX','XLSX','PPTX','DOC','XLS'].forEach(t => { %>
-      <option value="<%= t %>"
-        <%= filters && filters.type === t ? 'selected' : '' %>><%= t %></option>
-    <% }) %>
-  </select>
+/* Filters */
+.search-filters { margin-top: 16px; }
+.search-filters__toggle { cursor: pointer; font-size: .85rem; color: var(--text4,#888); list-style: none; padding: 8px 0 0; user-select: none; }
+.search-filters__toggle:hover { color: var(--text1,#fff); }
+.search-filters__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; margin-top: 16px; }
+.filter-group { display: flex; flex-direction: column; gap: 6px; }
+.filter-label { font-size: .75rem; font-weight: 600; color: var(--text4,#888); text-transform: uppercase; letter-spacing: .04em; }
+.filter-select, .filter-input { padding: 8px 12px; background: var(--bg3,#16161e); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: inherit; font-size: .88rem; outline: none; }
+.filter-select:focus, .filter-input:focus { border-color: var(--accent,#f0c87a); }
+.clear-filters { display: inline-block; margin-top: 12px; font-size: .8rem; color: var(--text4,#888); text-decoration: none; }
+.clear-filters:hover { color: var(--text1,#fff); }
 
-  <button type="submit" class="btn-filter">🔍 Buscar</button>
-  <a href="/search" class="btn-clear">✕ Limpiar</a>
-</form>
+/* Results header */
+.search-results-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: .9rem; }
+.results-count { font-weight: 700; }
+.results-query { color: var(--text4,#888); }
 
-<!-- Resultados -->
-<% if (results.length === 0) { %>
-  <div class="empty-state">
-    <div class="empty-icon">🔍</div>
-    <p>No se encontraron resultados para "<%= query %>".</p>
-    <p style="font-size:13px; color:var(--text4); margin-top:8px;">
-      Probá con otra palabra clave o revisá los filtros.
-    </p>
-    <a href="/" class="btn-primary" style="margin-top:16px;">← Volver al inicio</a>
-  </div>
-<% } else { %>
-  <div class="doc-grid">
-    <% results.forEach(doc => { %>
-      <%- include('../documents/_card', { doc }) %>
-    <% }) %>
-  </div>
-<% } %>
+/* Result items */
+.results-list { display: flex; flex-direction: column; gap: 8px; }
+.result-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--bg2,#1e1e2e); border-radius: 12px; border: 1px solid rgba(255,255,255,.05); transition: border-color .12s; }
+.result-item:hover { border-color: rgba(255,255,255,.15); }
+.result-item__icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.result-item__body { flex: 1; min-width: 0; }
+.result-item__name { font-weight: 600; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.result-item__meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.result-badge { font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.result-folder, .result-date, .result-size { font-size: .78rem; color: var(--text4,#888); }
+.result-item__type { font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.result-item__actions { display: flex; gap: 6px; flex-shrink: 0; }
+.doc-btn { background: rgba(255,255,255,.06); border: none; border-radius: 6px; padding: 5px 9px; cursor: pointer; text-decoration: none; font-size: .85rem; transition: background .1s; }
+.doc-btn:hover { background: rgba(255,255,255,.14); }
+
+/* Empty state */
+.search-empty { text-align: center; padding: 60px 20px; color: var(--text4,#888); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.search-empty span { font-size: 3rem; }
+
+@media(max-width:600px) {
+  .result-item__type { display: none; }
+  .search-main-row { flex-direction: column; }
+}
+</style>

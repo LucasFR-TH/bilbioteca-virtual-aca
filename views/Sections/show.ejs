@@ -1,0 +1,173 @@
+<%# views/sections/show.ejs — Contenido de sección o subcarpeta %>
+
+<!-- ── Breadcrumb ─────────────────────────────────────────── -->
+<nav class="breadcrumb" aria-label="Navegación">
+  <a href="/secciones" class="bc-link">Secciones</a>
+  <% breadcrumb.forEach((crumb, i) => { %>
+    <span class="bc-sep">›</span>
+    <% if (crumb.url) { %>
+      <a href="<%= crumb.url %>" class="bc-link"><%= crumb.label %></a>
+    <% } else { %>
+      <span class="bc-current"><%= crumb.label %></span>
+    <% } %>
+  <% }) %>
+</nav>
+
+<!-- ── Encabezado de sección ──────────────────────────────── -->
+<div class="section-header" style="--sec-color:<%= section.color %>">
+  <span class="section-header__emoji"><%= section.emoji %></span>
+  <div>
+    <h1 class="section-header__title"><%= title %></h1>
+    <% if (!notConfigured) { %>
+      <p class="section-header__meta">
+        <%= subfolders.length %> carpeta<%= subfolders.length !== 1 ? 's' : '' %> ·
+        <%= documents.length %> documento<%= documents.length !== 1 ? 's' : '' %>
+      </p>
+    <% } %>
+  </div>
+  <!-- Botón recargar caché -->
+  <button class="btn-refresh"
+          onclick="refreshCache('<%= section.id %>')"
+          title="Recargar desde Drive">
+    🔄
+  </button>
+</div>
+
+<!-- ── Sin configurar ─────────────────────────────────────── -->
+<% if (notConfigured) { %>
+<div class="empty-state">
+  <span style="font-size:3rem">⚙️</span>
+  <p>Esta sección aún no tiene un Folder ID de Drive configurado.</p>
+  <p>Editá <code>src/config/sections.js</code> y agregá el ID de la carpeta.</p>
+</div>
+
+<!-- ── Subcarpetas ────────────────────────────────────────── -->
+<% } else { %>
+
+<% if (subfolders.length > 0) { %>
+<section class="content-section">
+  <h2 class="content-section__title">📁 Carpetas</h2>
+  <div class="folder-grid">
+    <% subfolders.forEach(folder => { %>
+      <a href="/secciones/<%= section.id %>/carpeta/<%= folder.id %>?name=<%= encodeURIComponent(folder.name) %>"
+         class="folder-card">
+        <span class="folder-card__icon">📁</span>
+        <span class="folder-card__name"><%= folder.name %></span>
+        <span class="folder-card__meta"><%= folder.modifiedLabel %></span>
+      </a>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<!-- ── Documentos ─────────────────────────────────────────── -->
+<% if (documents.length > 0) { %>
+<section class="content-section">
+  <h2 class="content-section__title">📄 Documentos</h2>
+  <div class="doc-table">
+    <div class="doc-table__head">
+      <span>Nombre</span>
+      <span>Tipo</span>
+      <span>Modificado</span>
+      <span>Tamaño</span>
+      <span></span>
+    </div>
+    <% documents.forEach(doc => { %>
+      <div class="doc-table__row">
+        <span class="doc-table__name">
+          <span style="color:<%= doc.typeColor %>"><%= doc.typeIcon %></span>
+          <%= doc.name %>
+        </span>
+        <span class="doc-table__badge"
+              style="background:<%= doc.typeColor %>22; color:<%= doc.typeColor %>">
+          <%= doc.typeLabel %>
+        </span>
+        <span class="doc-table__date"><%= doc.modifiedLabel %></span>
+        <span class="doc-table__size"><%= doc.size || '—' %></span>
+        <span class="doc-table__actions">
+          <a href="<%= doc.viewUrl %>"    target="_blank" class="doc-btn" title="Ver en Drive">👁</a>
+          <a href="<%= doc.downloadUrl %>" target="_blank" class="doc-btn" title="Descargar">⬇</a>
+        </span>
+      </div>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<% if (subfolders.length === 0 && documents.length === 0) { %>
+<div class="empty-state">
+  <span style="font-size:3rem">📭</span>
+  <p>Esta carpeta está vacía o sus archivos no son públicos en Drive.</p>
+</div>
+<% } %>
+
+<% } %>
+
+<style>
+/* Breadcrumb */
+.breadcrumb { display:flex; align-items:center; gap:6px; font-size:.85rem; color:var(--text4,#888); margin-bottom:24px; flex-wrap:wrap; }
+.bc-link { color:var(--accent,#f0c87a); text-decoration:none; }
+.bc-link:hover { text-decoration:underline; }
+.bc-sep { opacity:.5; }
+.bc-current { color:var(--text1,#fff); }
+
+/* Header sección */
+.section-header { display:flex; align-items:center; gap:16px; margin-bottom:32px; padding:20px 24px; background:var(--bg2,#1e1e2e); border-radius:16px; border-left:4px solid var(--sec-color); }
+.section-header__emoji { font-size:2.2rem; }
+.section-header__title { font-size:1.4rem; font-weight:700; color:var(--sec-color); margin:0 0 4px; }
+.section-header__meta { font-size:.82rem; color:var(--text4,#888); margin:0; }
+.btn-refresh { margin-left:auto; background:none; border:1px solid rgba(255,255,255,.1); border-radius:8px; padding:6px 10px; cursor:pointer; font-size:1rem; color:inherit; transition:background .15s; }
+.btn-refresh:hover { background:rgba(255,255,255,.08); }
+
+/* Content sections */
+.content-section { margin-bottom:40px; }
+.content-section__title { font-size:1rem; font-weight:600; color:var(--text3,#ccc); margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.06); }
+
+/* Folder grid */
+.folder-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:12px; }
+.folder-card { display:flex; flex-direction:column; gap:6px; padding:16px; background:var(--bg2,#1e1e2e); border:1px solid rgba(255,255,255,.06); border-radius:12px; text-decoration:none; color:inherit; transition:transform .12s, border-color .12s; }
+.folder-card:hover { transform:translateY(-2px); border-color:#FFA726; }
+.folder-card__icon { font-size:1.5rem; }
+.folder-card__name { font-weight:600; font-size:.9rem; }
+.folder-card__meta { font-size:.75rem; color:var(--text4,#888); }
+
+/* Doc table */
+.doc-table { background:var(--bg2,#1e1e2e); border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,.06); }
+.doc-table__head, .doc-table__row { display:grid; grid-template-columns:1fr 80px 100px 70px 80px; align-items:center; padding:10px 16px; gap:12px; }
+.doc-table__head { font-size:.75rem; font-weight:600; color:var(--text4,#888); text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid rgba(255,255,255,.06); }
+.doc-table__row { font-size:.88rem; border-bottom:1px solid rgba(255,255,255,.04); transition:background .1s; }
+.doc-table__row:hover { background:rgba(255,255,255,.03); }
+.doc-table__row:last-child { border-bottom:none; }
+.doc-table__name { display:flex; align-items:center; gap:8px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.doc-table__badge { font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:20px; text-align:center; }
+.doc-table__date, .doc-table__size { font-size:.8rem; color:var(--text4,#888); }
+.doc-table__actions { display:flex; gap:6px; justify-content:flex-end; }
+.doc-btn { background:rgba(255,255,255,.06); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; text-decoration:none; font-size:.85rem; transition:background .1s; }
+.doc-btn:hover { background:rgba(255,255,255,.14); }
+
+/* Empty state */
+.empty-state { text-align:center; padding:60px 20px; color:var(--text4,#888); display:flex; flex-direction:column; align-items:center; gap:12px; }
+.empty-state code { background:rgba(255,255,255,.06); padding:2px 8px; border-radius:4px; font-size:.85rem; }
+
+/* Responsive */
+@media(max-width:600px) {
+  .doc-table__head, .doc-table__row { grid-template-columns:1fr 70px 80px; }
+  .doc-table__head span:nth-child(4),
+  .doc-table__head span:nth-child(5),
+  .doc-table__row .doc-table__size { display:none; }
+}
+</style>
+
+<script>
+async function refreshCache(sectionId) {
+  const btn = document.querySelector('.btn-refresh');
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  try {
+    const res = await fetch(`/secciones/${sectionId}/refresh`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) { btn.textContent = '✅'; setTimeout(() => location.reload(), 800); }
+    else { btn.textContent = '❌'; btn.disabled = false; }
+  } catch { btn.textContent = '❌'; btn.disabled = false; }
+}
+</script>

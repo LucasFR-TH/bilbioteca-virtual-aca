@@ -1,0 +1,225 @@
+@model bilbioteca_virtual_aca.Models.ViewModels.DriveSearchViewModel
+@{
+    ViewData["Title"] = string.IsNullOrEmpty(Model.Query) ? "Buscar documentos" : $"Resultados: \"{Model.Query}\"";
+}
+
+<div class="search-page">
+
+    <!-- ── Formulario ──────────────────────────────────────── -->
+    <div class="search-box-wrap">
+        <h1 class="search-page__title">🔍 Buscar documentos</h1>
+
+        <form asp-controller="Search" asp-action="Index" method="get" role="search">
+
+            <!-- Barra principal -->
+            <div class="search-main-row">
+                <input type="text" name="q" value="@Model.Query"
+                       placeholder="Nombre del documento…"
+                       class="search-input" autofocus autocomplete="off" />
+                <button type="submit" class="search-btn">Buscar</button>
+            </div>
+
+            <!-- Filtros avanzados -->
+            <details class="search-filters" @((!string.IsNullOrEmpty(Model.FilterSection) || !string.IsNullOrEmpty(Model.FilterSubfolder) || !string.IsNullOrEmpty(Model.FilterType)) ? "open" : "")>
+                <summary class="search-filters__toggle">⚙️ Filtros avanzados</summary>
+                <div class="search-filters__grid">
+
+                    <!-- Sección -->
+                    <div class="filter-group">
+                        <label class="filter-label">Sección</label>
+                        <select name="section" class="filter-select">
+                            <!option value="">Todas las secciones</!option>
+                            @foreach (var s in Model.Sections)
+                            {
+                                <!option value="@s.Id" @(Model.FilterSection == s.Id ? "selected" : "")>
+                                    @s.Emoji @s.Label
+                                </!option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Subcarpeta -->
+                    <div class="filter-group">
+                        <label class="filter-label">Subcarpeta</label>
+                        @if (Model.AllFolders.Any())
+                        {
+                            <select name="subfolder" class="filter-select">
+                                <!option value="">Todas las carpetas</!option>
+                                @foreach (var f in Model.AllFolders)
+                                {
+                                    <!option value="@f" @(Model.FilterSubfolder == f ? "selected" : "")>
+                                        📁 @f
+                                    </!option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <input type="text" name="subfolder" class="filter-input"
+                                   value="@Model.FilterSubfolder" placeholder="Nombre de carpeta" />
+                        }
+                    </div>
+
+                    <!-- Tipo de archivo -->
+                    <div class="filter-group">
+                        <label class="filter-label">Tipo de archivo</label>
+                        <select name="type" class="filter-select">
+                            <!option value="">Todos los tipos</!option>
+                            @{
+                                var typeOptions = Model.AllTypes.Any()
+                                    ? Model.AllTypes
+                                    : new List<string> { "PDF", "DOCX", "XLSX", "PPTX", "DOC", "XLS" };
+                            }
+                            @foreach (var t in typeOptions)
+                            {
+                                <!option value="@t" @(Model.FilterType == t ? "selected" : "")>@t</!option>
+                            }
+                        </select>
+                    </div>
+
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.FilterSection) || !string.IsNullOrEmpty(Model.FilterSubfolder) || !string.IsNullOrEmpty(Model.FilterType))
+                {
+                    <a href="@Url.Action("Index","Search", new { q = Model.Query })" class="clear-filters">
+                        ✕ Limpiar filtros
+                    </a>
+                }
+            </details>
+        </form>
+    </div>
+
+    <!-- ── Error Drive ─────────────────────────────────────── -->
+    @if (ViewBag.SearchError is not null)
+    {
+        <div class="alert-error">⚠️ Error al buscar: @ViewBag.SearchError</div>
+    }
+
+    <!-- ── Sin búsqueda ────────────────────────────────────── -->
+    @if (!Model.HasQuery)
+    {
+        <div class="search-empty">
+            <span>🔍</span>
+            <p>Ingresá un término para buscar en todas las secciones.</p>
+        </div>
+    }
+    else if (!Model.Results.Any())
+    {
+        <div class="search-empty">
+            <span>📭</span>
+            <p>No se encontraron documentos para <strong>"@Model.Query"</strong>.</p>
+            @if (!string.IsNullOrEmpty(Model.FilterSection) || !string.IsNullOrEmpty(Model.FilterType))
+            {
+                <p>Probá con menos filtros.</p>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- ── Resultados ───────────────────────────────────── -->
+        <div class="search-results-header">
+            <span class="results-count"><strong>@Model.Total</strong> resultado@(Model.Total != 1 ? "s" : "")</span>
+            @if (!string.IsNullOrEmpty(Model.Query))
+            {
+                <span class="results-query">para "@Model.Query"</span>
+            }
+        </div>
+
+        <div class="results-list">
+            @foreach (var doc in Model.Results)
+            {
+                <div class="result-item">
+                    <div class="result-item__icon"
+                         style="background:@(doc.TypeColor)22; color:@doc.TypeColor">
+                        @doc.TypeIcon
+                    </div>
+                    <div class="result-item__body">
+                        <div class="result-item__name">@doc.Name</div>
+                        <div class="result-item__meta">
+                            @if (doc.SectionLabel is not null)
+                            {
+                                <span class="result-badge"
+                                      style="background:@(doc.SectionColor)22; color:@doc.SectionColor">
+                                    @doc.SectionEmoji @doc.SectionLabel
+                                </span>
+                            }
+                            @if (!string.IsNullOrEmpty(doc.FolderName) && doc.FolderName != doc.SectionLabel)
+                            {
+                                <span class="result-folder">📁 @doc.FolderName</span>
+                            }
+                            @if (doc.ModifiedLabel is not null)
+                            {
+                                <span class="result-date">@doc.ModifiedLabel</span>
+                            }
+                            @if (doc.Size is not null)
+                            {
+                                <span class="result-size">@doc.Size</span>
+                            }
+                        </div>
+                    </div>
+                    <span class="result-item__type"
+                          style="background:@(doc.TypeColor)22; color:@doc.TypeColor">
+                        @doc.TypeLabel
+                    </span>
+                    <div class="result-item__actions">
+                        <a href="@doc.ViewUrl"    target="_blank" class="doc-btn" title="Ver en Drive">👁</a>
+                        <a href="@doc.DownloadUrl" target="_blank" class="doc-btn" title="Descargar">⬇</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Styles {
+<style>
+.search-page { max-width:860px; margin:0 auto; }
+.search-page__title { font-size:1.4rem; font-weight:700; margin-bottom:20px; }
+
+.search-box-wrap { background:var(--bg2,#1e1e2e); border-radius:16px; padding:24px; margin-bottom:32px; border:1px solid rgba(255,255,255,.06); }
+.search-main-row { display:flex; gap:10px; }
+.search-input { flex:1; padding:12px 16px; background:var(--bg3,#16161e); border:1px solid rgba(255,255,255,.1); border-radius:10px; color:inherit; font-size:1rem; outline:none; transition:border-color .15s; }
+.search-input:focus { border-color:var(--accent,#f0c87a); }
+.search-btn { padding:12px 24px; background:var(--accent,#f0c87a); color:#000; border:none; border-radius:10px; font-weight:700; cursor:pointer; font-size:.95rem; transition:opacity .15s; }
+.search-btn:hover { opacity:.88; }
+
+.search-filters { margin-top:16px; }
+.search-filters__toggle { cursor:pointer; font-size:.85rem; color:var(--text4,#888); list-style:none; padding:8px 0 0; user-select:none; }
+.search-filters__toggle:hover { color:var(--text1,#fff); }
+.search-filters__grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:12px; margin-top:16px; }
+.filter-group { display:flex; flex-direction:column; gap:6px; }
+.filter-label { font-size:.75rem; font-weight:600; color:var(--text4,#888); text-transform:uppercase; letter-spacing:.04em; }
+.filter-select, .filter-input { padding:8px 12px; background:var(--bg3,#16161e); border:1px solid rgba(255,255,255,.1); border-radius:8px; color:inherit; font-size:.88rem; outline:none; }
+.filter-select:focus, .filter-input:focus { border-color:var(--accent,#f0c87a); }
+.clear-filters { display:inline-block; margin-top:12px; font-size:.8rem; color:var(--text4,#888); text-decoration:none; }
+.clear-filters:hover { color:var(--text1,#fff); }
+
+.alert-error { background:rgba(239,83,80,.12); border:1px solid rgba(239,83,80,.3); border-radius:10px; padding:16px; margin-bottom:24px; font-size:.88rem; }
+
+.search-results-header { display:flex; align-items:center; gap:10px; margin-bottom:16px; font-size:.9rem; }
+.results-count { font-weight:700; }
+.results-query { color:var(--text4,#888); }
+
+.results-list { display:flex; flex-direction:column; gap:8px; }
+.result-item { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--bg2,#1e1e2e); border-radius:12px; border:1px solid rgba(255,255,255,.05); transition:border-color .12s; }
+.result-item:hover { border-color:rgba(255,255,255,.15); }
+.result-item__icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+.result-item__body { flex:1; min-width:0; }
+.result-item__name { font-weight:600; font-size:.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px; }
+.result-item__meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.result-badge { font-size:.72rem; font-weight:600; padding:2px 8px; border-radius:20px; }
+.result-folder, .result-date, .result-size { font-size:.78rem; color:var(--text4,#888); }
+.result-item__type { font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:20px; flex-shrink:0; }
+.result-item__actions { display:flex; gap:6px; flex-shrink:0; }
+.doc-btn { background:rgba(255,255,255,.06); border:none; border-radius:6px; padding:5px 9px; cursor:pointer; text-decoration:none; font-size:.85rem; transition:background .1s; }
+.doc-btn:hover { background:rgba(255,255,255,.14); }
+
+.search-empty { text-align:center; padding:60px 20px; color:var(--text4,#888); display:flex; flex-direction:column; align-items:center; gap:12px; }
+.search-empty span { font-size:3rem; }
+
+@@media(max-width:600px){
+    .result-item__type { display:none; }
+    .search-main-row { flex-direction:column; }
+}
+</style>
+}

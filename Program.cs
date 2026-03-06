@@ -1,29 +1,38 @@
+// Program.cs
+using bilbioteca_virtual_aca.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ── Servicios ─────────────────────────────────────────────────
 builder.Services.AddControllersWithViews();
+
+// HttpClient + DriveService (Singleton: comparte caché en toda la app)
+builder.Services.AddHttpClient<DriveService>();
+builder.Services.AddSingleton<DriveService>(sp =>
+{
+    var http   = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
+    var config = sp.GetRequiredService<IConfiguration>();
+    var env    = sp.GetRequiredService<IWebHostEnvironment>();
+    return new DriveService(http, config, env);
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ── Pipeline ──────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();

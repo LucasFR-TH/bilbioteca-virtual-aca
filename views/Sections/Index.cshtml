@@ -1,0 +1,73 @@
+@model bilbioteca_virtual_aca.Models.ViewModels.SectionsIndexViewModel
+@{
+    ViewData["Title"] = "Secciones";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Secciones</h1>
+    <p class="page-subtitle">Navegá por las áreas de la institución</p>
+</div>
+
+<div class="sections-grid">
+    @foreach (var sec in Model.Sections)
+    {
+        <a href="@Url.Action("Show", "Sections", new { id = sec.Id })"
+           class="section-card"
+           style="--sec-color: @sec.Color">
+            <div class="section-card__emoji">@sec.Emoji</div>
+            <div class="section-card__label">@sec.Label</div>
+            @if (sec.FolderId == "FOLDER_ID_AQUI")
+            {
+                <span class="section-card__pending">Sin configurar</span>
+            }
+        </a>
+    }
+</div>
+
+@section Styles {
+<style>
+.page-header { margin-bottom: 32px; }
+.page-title  { font-size: 1.6rem; font-weight: 700; margin: 0 0 6px; }
+.page-subtitle { color: var(--text4, #888); margin: 0; font-size: .9rem; }
+
+.sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+.section-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px 20px;
+    background: var(--bg2, #1e1e2e);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+    position: relative;
+}
+.section-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    border-color: var(--sec-color);
+}
+.section-card__emoji { font-size: 2.5rem; }
+.section-card__label {
+    font-weight: 600;
+    font-size: .95rem;
+    text-align: center;
+    color: var(--sec-color);
+}
+.section-card__pending {
+    font-size: .7rem;
+    color: var(--text4, #888);
+    background: rgba(255,255,255,.06);
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+</style>
+}

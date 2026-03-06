@@ -24,69 +24,70 @@
       </div>
     </div>
 
-    <!-- Stats rápidas -->
-    <% if (typeof stats !== 'undefined' && stats) { %>
-    <div class="sidebar-stats">
-      <div class="stat-chip">
-        <span class="stat-num"><%= stats.active %></span>
-        <span class="stat-label">Docs</span>
-      </div>
-      <div class="stat-chip">
-        <span class="stat-num"><%= stats.totalDownloads %></span>
-        <span class="stat-label">Descargas</span>
-      </div>
-    </div>
-    <% } %>
-
-    <!-- Navegación -->
+    <!-- Navegación principal -->
     <nav class="sidebar-nav">
       <a href="/" class="nav-item <%= currentPath === '/' ? 'active' : '' %>">
         <span>🏠</span> Inicio
       </a>
-      <a href="/documents" class="nav-item <%= currentPath.startsWith('/documents') ? 'active' : '' %>">
-        <span>📄</span> Documentos
-      </a>
-      <a href="/folders" class="nav-item <%= currentPath.startsWith('/folders') ? 'active' : '' %>">
-        <span>📁</span> Carpetas
-      </a>
-      <a href="/categories" class="nav-item <%= currentPath.startsWith('/categories') ? 'active' : '' %>">
-        <span>🏷️</span> Categorías
+      <a href="/secciones" class="nav-item <%= currentPath.startsWith('/secciones') ? 'active' : '' %>">
+        <span>📂</span> Secciones
       </a>
       <a href="/search" class="nav-item <%= currentPath.startsWith('/search') ? 'active' : '' %>">
         <span>🔍</span> Búsqueda
       </a>
     </nav>
 
-    <!-- Árbol de carpetas -->
-    <% if (typeof folderTree !== 'undefined' && folderTree && folderTree.length > 0) { %>
+    <!-- ── Secciones en el sidebar ─────────────────────────── -->
     <div class="folder-tree">
-      <div class="tree-label">Carpetas</div>
-      <% folderTree.forEach(folder => { %>
-        <div class="tree-root">
-          <a href="/folders/<%= folder.id %>" class="tree-node root-node">
-            <span class="toggle-arrow">▶</span>
-            <span><%= folder.icon %></span>
-            <span class="node-name"><%= folder.name %></span>
-            <span class="node-dot" style="background:<%= folder.color %>"></span>
-          </a>
-          <% if (folder.children && folder.children.length > 0) { %>
-          <div class="tree-children">
-            <% folder.children.forEach(child => { %>
-              <a href="/folders/<%= child.id %>" class="tree-node child-node">
-                <span><%= child.icon %></span>
-                <span class="node-name"><%= child.name %></span>
-              </a>
-            <% }) %>
-          </div>
-          <% } %>
-        </div>
-      <% }) %>
-    </div>
-    <% } %>
+      <div class="tree-label">Secciones</div>
 
-    <!-- Footer sidebar -->
-    <div class="sidebar-footer">
-      <a href="/documents/new" class="btn-new-doc">＋ Nuevo Documento</a>
+      <a href="/secciones/actividades"
+         class="tree-node root-node <%= currentPath.includes('/actividades') ? 'tree-node--active' : '' %>">
+        <span>🏃</span><span class="node-name">Actividades</span>
+        <span class="node-dot" style="background:#4CAF50"></span>
+      </a>
+
+      <a href="/secciones/area-adultos"
+         class="tree-node root-node <%= currentPath.includes('/area-adultos') ? 'tree-node--active' : '' %>">
+        <span>👨</span><span class="node-name">Área Adultos</span>
+        <span class="node-dot" style="background:#9E9E9E"></span>
+      </a>
+
+      <a href="/secciones/area-aspirantes"
+         class="tree-node root-node <%= currentPath.includes('/area-aspirantes') ? 'tree-node--active' : '' %>">
+        <span>🌱</span><span class="node-name">Área Aspirantes</span>
+        <span class="node-dot" style="background:#66BB6A"></span>
+      </a>
+
+      <a href="/secciones/area-joven"
+         class="tree-node root-node <%= currentPath.includes('/area-joven') ? 'tree-node--active' : '' %>">
+        <span>🧑</span><span class="node-name">Área Joven</span>
+        <span class="node-dot" style="background:#42A5F5"></span>
+      </a>
+
+      <a href="/secciones/area-sectores"
+         class="tree-node root-node <%= currentPath.includes('/area-sectores') ? 'tree-node--active' : '' %>">
+        <span>🗂️</span><span class="node-name">Área Sectores</span>
+        <span class="node-dot" style="background:#EF5350"></span>
+      </a>
+
+      <a href="/secciones/formacion"
+         class="tree-node root-node <%= currentPath.includes('/formacion') ? 'tree-node--active' : '' %>">
+        <span>📚</span><span class="node-name">Formación</span>
+        <span class="node-dot" style="background:#FF7043"></span>
+      </a>
+
+      <a href="/secciones/recreacion"
+         class="tree-node root-node <%= currentPath.includes('/recreacion') ? 'tree-node--active' : '' %>">
+        <span>🎨</span><span class="node-name">Recreación</span>
+        <span class="node-dot" style="background:#AB47BC"></span>
+      </a>
+
+      <a href="/secciones/semana-santa"
+         class="tree-node root-node <%= currentPath.includes('/semana-santa') ? 'tree-node--active' : '' %>">
+        <span>✝️</span><span class="node-name">Semana Santa</span>
+        <span class="node-dot" style="background:#FFA726"></span>
+      </a>
     </div>
 
   </aside>
@@ -98,6 +99,7 @@
     <header class="topbar">
       <button class="sidebar-toggle" aria-label="Menú">☰</button>
 
+      <!-- Buscador rápido en topbar -->
       <form action="/search" method="GET" class="search-form" role="search">
         <span class="search-icon">🔍</span>
         <input
@@ -110,8 +112,6 @@
         />
         <button type="submit" class="search-btn">Buscar</button>
       </form>
-
-      <a href="/api/documents" class="topbar-api-link" target="_blank" rel="noopener">⚡ API</a>
     </header>
 
     <!-- Contenido -->
